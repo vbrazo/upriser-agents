@@ -14,7 +14,7 @@ npm install @upriser/widget
 
 ```html
 <!-- Include directly in your HTML -->
-<script src="https://unpkg.com/@vbrazo/widget/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
 
 <!-- Or download and host yourself -->
 <script src="path/to/upriser-widget.js"></script>
