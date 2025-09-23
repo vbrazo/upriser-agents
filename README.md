@@ -90,7 +90,7 @@ widget.init();
     <!-- Your website content -->
     
     <!-- Include the Upriser widget script -->
-    <script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+    <script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
     
     <script>
         // The widget will auto-initialize with default settings
@@ -105,8 +105,8 @@ widget.init();
         const myWidget = new UpriserWidget({
             agentId: 'your-custom-agent-id',
             debug: true,
-            fontColor: '#ffffff', // NEW: Custom font color
-            linkColor: '#007bff'  // NEW: Custom link color
+            fontColor: '#ffffff',
+            linkColor: '#007bff'
         });
         myWidget.init();
     </script>
@@ -127,7 +127,7 @@ widget.init();
     // Disable auto-initialization if you want full control
     // window.UPRISER_DISABLE_AUTO_INIT = true;
 </script>
-<script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
 ```
 
 #### WordPress Integration
@@ -142,7 +142,7 @@ function add_upriser_widget() {
             debug: <?php echo WP_DEBUG ? 'true' : 'false'; ?>
         };
     </script>
-    <script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+    <script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
     <?php
 }
 add_action('wp_footer', 'add_upriser_widget');
@@ -163,7 +163,7 @@ Upriser Widget now supports complete whitelabeling with custom branding and colo
 </upriser-convai>
 
 <!-- Load the script -->
-<script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
 ```
 
 ### Custom Element Attributes
