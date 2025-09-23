@@ -14,7 +14,7 @@ npm install @upriser/widget
 
 ```html
 <!-- Include directly in your HTML -->
-<script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget/upriser-widget.js"></script>
 
 <!-- Or download and host yourself -->
 <script src="path/to/upriser-widget.js"></script>
@@ -33,7 +33,9 @@ import UpriserWidget from '@upriser/widget';
 const widget = new UpriserWidget({
   agentId: 'your-agent-id-here', // Optional: defaults to Upriser's agent
   debug: true, // Optional: enable debug logging
-  widgetContainer: document.getElementById('chat-container') // Optional: specify container
+  widgetContainer: document.getElementById('chat-container'), // Optional: specify container
+  fontColor: '#ffffff', // Optional: customize text color (NEW!)
+  linkColor: '#007bff' // Optional: customize link color (NEW!)
 });
 
 // Initialize the widget
@@ -102,7 +104,9 @@ widget.init();
         // Option 2: Create your own instance
         const myWidget = new UpriserWidget({
             agentId: 'your-custom-agent-id',
-            debug: true
+            debug: true,
+            fontColor: '#ffffff', // NEW: Custom font color
+            linkColor: '#007bff'  // NEW: Custom link color
         });
         myWidget.init();
     </script>
@@ -144,6 +148,113 @@ function add_upriser_widget() {
 add_action('wp_footer', 'add_upriser_widget');
 ```
 
+## 🎨 Whitelabel Features (NEW!)
+
+Upriser Widget now supports complete whitelabeling with custom branding and colors!
+
+### Custom HTML Element
+
+Instead of using `<elevenlabs-convai>`, you can now use the whitelabel `<upriser-convai>` element:
+
+```html
+<!-- NEW: Whitelabel custom element -->
+<upriser-convai 
+    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+    font-color="#ffffff"
+    link-color="#007bff">
+</upriser-convai>
+
+<!-- Load the script -->
+<script src="https://unpkg.com/@upriser/widget/upriser-widget.js"></script>
+```
+
+### Custom Element Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `agent-id` | string | Required | ElevenLabs agent ID |
+| `font-color` | string | `#ffffff` | Color for "Powered by Upriser.ai" text |
+| `link-color` | string | `#ffffff` | Color for links to Upriser.ai |
+
+### Dynamic Color Changes
+
+You can change colors dynamically using JavaScript:
+
+```javascript
+// Get the widget element
+const widget = document.querySelector('upriser-convai');
+
+// Change colors
+widget.setAttribute('font-color', '#ff6b6b');
+widget.setAttribute('link-color', '#4ecdc4');
+
+// Colors will be applied automatically
+```
+
+### JavaScript Class with Colors
+
+Use the UpriserWidget class with custom colors:
+
+```javascript
+const widget = new UpriserWidget({
+    agentId: 'agent_8401k5nnvgqpezf9fd17t3tb7t69',
+    fontColor: '#ffffff',  // Custom font color
+    linkColor: '#007bff',  // Custom link color
+    debug: false
+});
+
+widget.init();
+```
+
+### Color Examples
+
+```html
+<!-- Blue Theme -->
+<upriser-convai 
+    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+    font-color="#ffffff"
+    link-color="#007bff">
+</upriser-convai>
+
+<!-- Green Theme -->
+<upriser-convai 
+    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+    font-color="#ffffff"
+    link-color="#28a745">
+</upriser-convai>
+
+<!-- Purple Theme -->
+<upriser-convai 
+    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+    font-color="#f8f9fa"
+    link-color="#6f42c1">
+</upriser-convai>
+```
+
+### Migration from elevenlabs-convai
+
+Migrating is simple - just replace the element name and add color attributes:
+
+```html
+<!-- OLD -->
+<elevenlabs-convai agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"></elevenlabs-convai>
+
+<!-- NEW -->
+<upriser-convai 
+    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+    font-color="#ffffff"
+    link-color="#007bff">
+</upriser-convai>
+```
+
+### Benefits of Whitelabel Version
+
+✅ **Complete Branding Control** - No ElevenLabs branding visible  
+✅ **Custom Colors** - Match your brand colors exactly  
+✅ **Dynamic Updates** - Change colors on the fly  
+✅ **Backward Compatible** - Still works with elevenlabs-convai  
+✅ **Better Events** - Enhanced event handling and API  
+
 ## Configuration Options
 
 | Option | Type | Default | Description |
@@ -151,6 +262,8 @@ add_action('wp_footer', 'add_upriser_widget');
 | `agentId` | string | `'agent_8401k5nnvgqpezf9fd17t3tb7t69'` | ElevenLabs agent ID to use |
 | `widgetContainer` | HTMLElement \| null | `null` | Container to append widget to (defaults to document.body) |
 | `debug` | boolean | `false` | Enable debug logging |
+| `fontColor` | string | `'#ffffff'` | **NEW!** Custom color for "Powered by Upriser.ai" text |
+| `linkColor` | string | `'#ffffff'` | **NEW!** Custom color for links to Upriser.ai |
 
 ## API Methods
 

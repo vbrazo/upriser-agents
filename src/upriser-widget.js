@@ -13,6 +13,8 @@ class UpriserWidget {
           agentId: 'agent_8401k5nnvgqpezf9fd17t3tb7t69',
           widgetContainer: config.widgetContainer || null,
           debug: config.debug || false,
+          fontColor: config.fontColor || '#ffffff',
+          linkColor: config.linkColor || '#ffffff',
           ...config
       };
       
@@ -35,7 +37,16 @@ class UpriserWidget {
 
       try {
       await this.loadElevenLabsScript();
-      this.createConvAIElement();
+      
+      // Define custom element if not already defined
+      this.defineUpriserConvAIElement();
+      
+      // Create the widget element (use upriser-convai if custom element is supported)
+      if (typeof customElements !== 'undefined' && customElements.get('upriser-convai')) {
+          this.createUpriserConvAIElement();
+      } else {
+          this.createConvAIElement();
+      }
       
       // Start monitoring and setup all functionality
       this.startRelabelFlow();
@@ -127,6 +138,169 @@ class UpriserWidget {
       this.log('ConvAI element created with agent ID:', this.config.agentId);
   }
 
+  /**
+   * Create the custom Upriser ConvAI element
+   */
+  createUpriserConvAIElement() {
+      const container = this.config.widgetContainer || document.body;
+      
+      // Remove existing widget if present
+      const existingWidget = container.querySelector('upriser-convai');
+      if (existingWidget) {
+          existingWidget.remove();
+      }
+
+      const upriserElement = document.createElement('upriser-convai');
+      upriserElement.setAttribute('agent-id', this.config.agentId);
+      upriserElement.setAttribute('font-color', this.config.fontColor);
+      upriserElement.setAttribute('link-color', this.config.linkColor);
+      
+      container.appendChild(upriserElement);
+      this.log('Upriser ConvAI element created with agent ID:', this.config.agentId);
+  }
+
+  /**
+   * Define the custom upriser-convai web component
+   */
+  defineUpriserConvAIElement() {
+      if (typeof customElements === 'undefined') {
+          this.log('Custom elements not supported');
+          return;
+      }
+
+      if (customElements.get('upriser-convai')) {
+          this.log('upriser-convai element already defined');
+          return;
+      }
+
+      const self = this;
+
+      class UpriserConvAIElement extends HTMLElement {
+          constructor() {
+              super();
+              this.elevenLabsElement = null;
+              this.initialized = false;
+          }
+
+          connectedCallback() {
+              if (!this.initialized) {
+                  this.init();
+              }
+          }
+
+          disconnectedCallback() {
+              if (this.elevenLabsElement) {
+                  this.elevenLabsElement.remove();
+              }
+          }
+
+          static get observedAttributes() {
+              return ['agent-id', 'font-color', 'link-color'];
+          }
+
+          attributeChangedCallback(name, oldValue, newValue) {
+              if (this.elevenLabsElement && oldValue !== newValue) {
+                  if (name === 'agent-id') {
+                      this.elevenLabsElement.setAttribute('agent-id', newValue);
+                  } else if (name === 'font-color' || name === 'link-color') {
+                      // Update the widget config and trigger relabeling
+                      if (self.config) {
+                          if (name === 'font-color') self.config.fontColor = newValue;
+                          if (name === 'link-color') self.config.linkColor = newValue;
+                          setTimeout(() => self.attemptRelabelEverywhere(), 100);
+                      }
+                  }
+              }
+          }
+
+          async init() {
+              try {
+                  // Wait for elevenlabs-convai to be available
+                  if (!customElements.get('elevenlabs-convai')) {
+                      await self.loadElevenLabsScript();
+                  }
+
+                  // Create the elevenlabs-convai element
+                  this.elevenLabsElement = document.createElement('elevenlabs-convai');
+                  
+                  // Copy attributes
+                  const agentId = this.getAttribute('agent-id') || self.config.agentId;
+                  this.elevenLabsElement.setAttribute('agent-id', agentId);
+
+                  // Copy other attributes (excluding our custom ones)
+                  for (const attr of this.attributes) {
+                      if (!['font-color', 'link-color'].includes(attr.name)) {
+                          this.elevenLabsElement.setAttribute(attr.name, attr.value);
+                      }
+                  }
+
+                  // Apply styling
+                  this.elevenLabsElement.style.cssText = this.style.cssText;
+                  
+                  // Append to our shadow root or directly
+                  this.appendChild(this.elevenLabsElement);
+                  
+                  this.initialized = true;
+                  
+                  // Update config with colors if specified
+                  const fontColor = this.getAttribute('font-color');
+                  const linkColor = this.getAttribute('link-color');
+                  if (fontColor) self.config.fontColor = fontColor;
+                  if (linkColor) self.config.linkColor = linkColor;
+
+                  self.log('upriser-convai element initialized');
+                  
+                  // Dispatch custom event
+                  this.dispatchEvent(new CustomEvent('upriser:initialized', {
+                      bubbles: true,
+                      detail: { element: this, agentId }
+                  }));
+
+              } catch (error) {
+                  console.error('Failed to initialize upriser-convai element:', error);
+                  this.dispatchEvent(new CustomEvent('upriser:error', {
+                      bubbles: true,
+                      detail: { error, element: this }
+                  }));
+              }
+          }
+
+          // Public API methods
+          show() {
+              if (this.elevenLabsElement && typeof this.elevenLabsElement.show === 'function') {
+                  return this.elevenLabsElement.show();
+              }
+          }
+
+          hide() {
+              if (this.elevenLabsElement && typeof this.elevenLabsElement.hide === 'function') {
+                  return this.elevenLabsElement.hide();
+              }
+          }
+
+          toggle() {
+              if (this.elevenLabsElement && typeof this.elevenLabsElement.toggle === 'function') {
+                  return this.elevenLabsElement.toggle();
+              }
+          }
+
+          destroy() {
+              if (this.elevenLabsElement) {
+                  this.elevenLabsElement.remove();
+                  this.elevenLabsElement = null;
+              }
+              this.initialized = false;
+          }
+      }
+
+      try {
+          customElements.define('upriser-convai', UpriserConvAIElement);
+          this.log('upriser-convai custom element defined successfully');
+      } catch (error) {
+          console.error('Failed to define upriser-convai custom element:', error);
+      }
+  }
+
   // Modal demo removed
 
   /**
@@ -150,6 +324,28 @@ class UpriserWidget {
                   }
                   .bg-base.items-start {
                       align-items: center !important;
+                  }
+                  /* Apply linkColor to all links within the widget */
+                  elevenlabs-convai a, 
+                  upriser-convai a,
+                  elevenlabs-convai a:visited,
+                  upriser-convai a:visited,
+                  elevenlabs-convai a:hover,
+                  upriser-convai a:hover,
+                  elevenlabs-convai a:focus,
+                  upriser-convai a:focus {
+                      color: ${this.config.linkColor} !important;
+                      opacity: 1 !important;
+                  }
+                  
+                  /* Remove opacity classes that make links gray */
+                  elevenlabs-convai a.opacity-30,
+                  upriser-convai a.opacity-30,
+                  elevenlabs-convai a.opacity-50,
+                  upriser-convai a.opacity-50,
+                  elevenlabs-convai a.opacity-70,
+                  upriser-convai a.opacity-70 {
+                      opacity: 1 !important;
                   }
               `;
               
@@ -338,7 +534,7 @@ class UpriserWidget {
                   s.classList.remove('opacity-30', 'opacity-50', 'opacity-70');
                   s.classList.add('upriser-white');
                   s.setAttribute('data-upriser-branded', 'true');
-                  s.style.setProperty('color', '#ffffff', 'important');
+                  s.style.setProperty('color', this.config.fontColor, 'important');
                   s.style.setProperty('opacity', '1', 'important');
                   replaced = true;
               }
@@ -349,6 +545,18 @@ class UpriserWidget {
           anchors.forEach((a) => {
               const href = a.getAttribute('href') || '';
               const text = (a.textContent || '').trim();
+              
+              // Apply linkColor to all links and remove opacity classes
+              if (!a.getAttribute('data-upriser-color-applied')) {
+                  a.style.setProperty('color', this.config.linkColor, 'important');
+                  a.style.setProperty('opacity', '1', 'important');
+                  // Remove opacity classes that make links appear gray
+                  a.classList.remove('opacity-30', 'opacity-50', 'opacity-70');
+                  a.setAttribute('data-upriser-color-applied', 'true');
+                  replaced = true;
+              }
+              
+              // Handle ElevenLabs-specific links for replacement
               if (href.includes('elevenlabs') || text === 'Conversational AI' || text.includes('ElevenLabs')) {
                   if (a.getAttribute('data-upriser-processed') === 'true') {
                       return;
@@ -359,7 +567,6 @@ class UpriserWidget {
                   a.setAttribute('target', '_blank');
                   a.setAttribute('rel', 'noopener noreferrer');
                   a.setAttribute('data-upriser-processed', 'true');
-                  a.style.setProperty('color', '#ffffff', 'important');
                   
                   const newEl = a.cloneNode(true);
                   a.parentNode.replaceChild(newEl, a);
@@ -390,7 +597,11 @@ class UpriserWidget {
   attemptRelabelEverywhere() {
       try {
           let done = this.relabelAndRewriteLinks(document.body);
-          const host = document.querySelector('elevenlabs-convai');
+          
+          // Check both upriser-convai and elevenlabs-convai elements
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
           
           if (host && host.shadowRoot) {
               done = this.relabelAndRewriteLinks(host.shadowRoot) || done;
@@ -468,8 +679,11 @@ class UpriserWidget {
       this.attemptRelabelEverywhere();
 
       const retryInterval = setInterval(() => {
-          const host = document.querySelector('elevenlabs-convai');
-          if (host && host.shadowRoot) {
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
+          
+          if (host && (host.shadowRoot || (upriserHost && upriserHost.querySelector('elevenlabs-convai')))) {
               this.log('Widget loaded, attempting relabeling...');
               if (this.attemptRelabelEverywhere()) {
                   this.log('Relabeling successful, stopping retry interval');
@@ -588,7 +802,9 @@ class UpriserWidget {
 
       const attempt = () => {
           try {
-              const host = document.querySelector('elevenlabs-convai');
+              const upriserHost = document.querySelector('upriser-convai');
+              const elevenLabsHost = document.querySelector('elevenlabs-convai');
+              const host = upriserHost || elevenLabsHost;
               
               if (host && !widgetInitiallyProcessed) {
                   this.hideWidgetInitially();
@@ -603,9 +819,17 @@ class UpriserWidget {
           } catch {}
           
           let done = clickAccept(document.body);
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
+          
           if (host && host.shadowRoot) {
               done = clickAccept(host.shadowRoot) || done;
+          } else if (upriserHost && upriserHost.querySelector('elevenlabs-convai')) {
+              const nestedHost = upriserHost.querySelector('elevenlabs-convai');
+              if (nestedHost.shadowRoot) {
+                  done = clickAccept(nestedHost.shadowRoot) || done;
+              }
           }
           return done;
       };
@@ -621,7 +845,9 @@ class UpriserWidget {
       this.intervals.set('auto-accept', intervalId);
 
       const observer = new MutationObserver((mutations) => {
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
           let shouldProcess = false;
           let widgetStateChanged = false;
           
@@ -683,7 +909,10 @@ class UpriserWidget {
       });
 
       const checkShadowRoots = () => {
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
+          
           if (host && host.shadowRoot) {
               try {
                   shadowObserver.observe(host.shadowRoot, { 
@@ -693,6 +922,18 @@ class UpriserWidget {
                       attributeOldValue: true
                   });
               } catch {}
+          } else if (upriserHost && upriserHost.querySelector('elevenlabs-convai')) {
+              const nestedHost = upriserHost.querySelector('elevenlabs-convai');
+              if (nestedHost.shadowRoot) {
+                  try {
+                      shadowObserver.observe(nestedHost.shadowRoot, { 
+                          childList: true, 
+                          subtree: true,
+                          attributes: true,
+                          attributeOldValue: true
+                      });
+                  } catch {}
+              }
           }
       };
 
@@ -719,7 +960,9 @@ class UpriserWidget {
    * Hides widget initially when detected
    */
   hideWidgetInitially() {
-      const host = document.querySelector('elevenlabs-convai');
+      const upriserHost = document.querySelector('upriser-convai');
+      const elevenLabsHost = document.querySelector('elevenlabs-convai');
+      const host = upriserHost || elevenLabsHost;
       if (!host) return;
       host.style.setProperty('visibility', 'hidden', 'important');
       host.style.setProperty('opacity', '0', 'important');
@@ -730,7 +973,9 @@ class UpriserWidget {
    */
   showWidgetAfterDelay(ms = 500) {
       const timeoutId = setTimeout(() => {
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
           if (!host) return;
           try {
               host.style.removeProperty('visibility');
@@ -744,7 +989,9 @@ class UpriserWidget {
    * Hides widget temporarily with timeout management
    */
   hideWidgetTemporarily(ms = 500) {
-      const host = document.querySelector('elevenlabs-convai');
+      const upriserHost = document.querySelector('upriser-convai');
+      const elevenLabsHost = document.querySelector('elevenlabs-convai');
+      const host = upriserHost || elevenLabsHost;
       if (!host) return;
       
       // Clear any existing timeout
@@ -753,7 +1000,7 @@ class UpriserWidget {
           clearTimeout(existingTimeout);
       }
       
-host.style.setProperty('visibility', 'hidden', 'important');
+      host.style.setProperty('visibility', 'hidden', 'important');
       host.style.setProperty('opacity', '0', 'important');
       
       const timeoutId = setTimeout(() => {
@@ -775,7 +1022,9 @@ host.style.setProperty('visibility', 'hidden', 'important');
           clearTimeout(hideTimeout);
           this.timeouts.delete('hide-widget');
           
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
           if (host) {
               try {
                   host.style.removeProperty('visibility');
@@ -868,12 +1117,19 @@ host.style.setProperty('visibility', 'hidden', 'important');
    */
   resetWidgetToInitialState() {
       try {
-          const host = document.querySelector('elevenlabs-convai');
+          const upriserHost = document.querySelector('upriser-convai');
+          const elevenLabsHost = document.querySelector('elevenlabs-convai');
+          const host = upriserHost || elevenLabsHost;
           if (!host) return;
           
           this.clearWidgetWiring(document.body);
           if (host.shadowRoot) {
               this.clearWidgetWiring(host.shadowRoot);
+          } else if (upriserHost && upriserHost.querySelector('elevenlabs-convai')) {
+              const nestedHost = upriserHost.querySelector('elevenlabs-convai');
+              if (nestedHost.shadowRoot) {
+                  this.clearWidgetWiring(nestedHost.shadowRoot);
+              }
           }
           
           if (host.shadowRoot) {
@@ -950,9 +1206,13 @@ host.style.setProperty('visibility', 'hidden', 'important');
       
       
       // Remove ConvAI element
-      const widget = document.querySelector('elevenlabs-convai');
-      if (widget) {
-          widget.remove();
+      const upriserWidget = document.querySelector('upriser-convai');
+      const elevenLabsWidget = document.querySelector('elevenlabs-convai');
+      if (upriserWidget) {
+          upriserWidget.remove();
+      }
+      if (elevenLabsWidget) {
+          elevenLabsWidget.remove();
       }
       
       // Clear widget wiring

@@ -36,6 +36,8 @@ describe('UpriserWidget', () => {
       
       expect(defaultWidget.config.agentId).toBe('agent_8401k5nnvgqpezf9fd17t3tb7t69');
       expect(defaultWidget.config.debug).toBe(false);
+      expect(defaultWidget.config.fontColor).toBe('#ffffff');
+      expect(defaultWidget.config.linkColor).toBe('#ffffff');
       expect(defaultWidget.isInitialized).toBe(false);
     });
 
@@ -43,6 +45,17 @@ describe('UpriserWidget', () => {
       expect(widget.config.agentId).toBe('test-agent-id');
       expect(widget.config.debug).toBe(true);
       expect(widget.isInitialized).toBe(false);
+    });
+
+    test('should create widget with custom colors', () => {
+      const colorWidget = new UpriserWidget({
+        fontColor: '#ff6b6b',
+        linkColor: '#4ecdc4'
+      });
+      
+      expect(colorWidget.config.fontColor).toBe('#ff6b6b');
+      expect(colorWidget.config.linkColor).toBe('#4ecdc4');
+      expect(colorWidget.config.agentId).toBe('agent_8401k5nnvgqpezf9fd17t3tb7t69'); // Default
     });
 
     test('should initialize internal properties', () => {
@@ -95,12 +108,30 @@ describe('UpriserWidget', () => {
       expect(convaiElement.getAttribute('agent-id')).toBe('test-agent-id');
     });
 
+    test('should create Upriser ConvAI element with colors', () => {
+      widget.createUpriserConvAIElement();
+      
+      const upriserElement = document.querySelector('upriser-convai');
+      expect(upriserElement).toBeTruthy();
+      expect(upriserElement.getAttribute('agent-id')).toBe('test-agent-id');
+      expect(upriserElement.getAttribute('font-color')).toBe('#ffffff');
+      expect(upriserElement.getAttribute('link-color')).toBe('#ffffff');
+    });
+
     test('should replace existing ConvAI element', () => {
       widget.createConvAIElement();
       widget.createConvAIElement(); // Create second one
       
       const convaiElements = document.querySelectorAll('elevenlabs-convai');
       expect(convaiElements.length).toBe(1);
+    });
+
+    test('should replace existing Upriser ConvAI element', () => {
+      widget.createUpriserConvAIElement();
+      widget.createUpriserConvAIElement(); // Create second one
+      
+      const upriserElements = document.querySelectorAll('upriser-convai');
+      expect(upriserElements.length).toBe(1);
     });
 
     test('should remove need help elements', () => {
@@ -145,6 +176,23 @@ describe('UpriserWidget', () => {
       expect(widget.mutationObserver).toBeNull();
       expect(document.querySelector('elevenlabs-convai')).toBeNull();
     });
+
+    test('should destroy widget with upriser element and clear resources', () => {
+      // Add some timeouts and intervals
+      widget.timeouts.set('test', setTimeout(() => {}, 1000));
+      widget.intervals.set('test', setInterval(() => {}, 1000));
+      
+      // Create Upriser ConvAI element
+      widget.createUpriserConvAIElement();
+      
+      widget.destroy();
+      
+      expect(widget.timeouts.size).toBe(0);
+      expect(widget.intervals.size).toBe(0);
+      expect(widget.isInitialized).toBe(false);
+      expect(widget.mutationObserver).toBeNull();
+      expect(document.querySelector('upriser-convai')).toBeNull();
+    });
   });
 
   describe('Script Loading', () => {
@@ -158,6 +206,82 @@ describe('UpriserWidget', () => {
       
       // Should return same promise instance
       expect(promise1).toBe(promise2);
+    });
+  });
+
+  describe('Custom Element Definition', () => {
+    test('should define upriser-convai custom element when supported', () => {
+      // Mock customElements API
+      global.customElements.define = jest.fn();
+      global.customElements.get = jest.fn().mockReturnValue(null); // Not defined yet
+      
+      widget.defineUpriserConvAIElement();
+      
+      expect(global.customElements.define).toHaveBeenCalledWith(
+        'upriser-convai',
+        expect.any(Function)
+      );
+    });
+
+    test('should not define custom element when already defined', () => {
+      // Mock customElements API
+      global.customElements.define = jest.fn();
+      global.customElements.get = jest.fn().mockReturnValue(function() {}); // Already defined
+      
+      widget.defineUpriserConvAIElement();
+      
+      expect(global.customElements.define).not.toHaveBeenCalled();
+    });
+
+    test('should handle missing customElements gracefully', () => {
+      const originalCustomElements = global.customElements;
+      global.customElements = undefined;
+      
+      expect(() => {
+        widget.defineUpriserConvAIElement();
+      }).not.toThrow();
+      
+      global.customElements = originalCustomElements;
+    });
+  });
+
+  describe('Color Configuration', () => {
+    test('should use custom colors in relabeling', () => {
+      const colorWidget = new UpriserWidget({
+        fontColor: '#ff6b6b',
+        linkColor: '#4ecdc4'
+      });
+      
+      // Create a mock span element with "Powered by ElevenLabs" text
+      const span = document.createElement('span');
+      span.textContent = 'Powered by ElevenLabs';
+      span.className = 'opacity-30';
+      document.body.appendChild(span);
+      
+      const result = colorWidget.relabelAndRewriteLinks(document.body);
+      
+      expect(result).toBe(true);
+      expect(span.textContent).toBe('Powered by Upriser.ai');
+      expect(span.style.color).toBe('rgb(255, 107, 107)'); // Converted from hex
+    });
+
+    test('should use custom link colors', () => {
+      const colorWidget = new UpriserWidget({
+        fontColor: '#ffffff',
+        linkColor: '#007bff'
+      });
+      
+      // Create a mock link element
+      const link = document.createElement('a');
+      link.href = 'https://elevenlabs.io';
+      link.textContent = 'ElevenLabs';
+      document.body.appendChild(link);
+      
+      const result = colorWidget.relabelAndRewriteLinks(document.body);
+      
+      expect(result).toBe(true);
+      expect(link.href).toBe('https://www.upriser.ai/');
+      expect(link.style.color).toBe('rgb(0, 123, 255)'); // Converted from hex
     });
   });
 });

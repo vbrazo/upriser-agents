@@ -1,6 +1,6 @@
 {
-  "name": "@upriser/widget",
-  "version": "1.0.0",
+  "name": "@vbrazo/widget",
+  "version": "1.1.2",
   "description": "A standalone JavaScript widget for integrating Upriser ElevenLabs ConvAI into any website",
   "main": "dist/upriser-widget.js",
   "module": "dist/upriser-widget.esm.js",
@@ -33,16 +33,16 @@
     "voice",
     "ai-assistant"
   ],
-  "author": "Upriser",
+  "author": "vbrazo",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/upriser/upriser-widget.git"
+    "url": "git+https://github.com/vbrazo/upriser-widget.git"
   },
   "bugs": {
-    "url": "https://github.com/upriser/upriser-widget/issues"
+    "url": "https://github.com/vbrazo/upriser-widget/issues"
   },
-  "homepage": "https://github.com/upriser/upriser-widget#readme",
+  "homepage": "https://github.com/vbrazo/upriser-widget#readme",
   "devDependencies": {
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
@@ -53,5 +53,9 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "type": "commonjs"
 }
