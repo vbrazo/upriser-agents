@@ -1,6 +1,6 @@
 {
   "name": "@vbrazo/widget",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "A standalone JavaScript widget for integrating Upriser ElevenLabs ConvAI into any website",
   "main": "dist/upriser-widget.js",
   "module": "dist/upriser-widget.esm.js",
