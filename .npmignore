@@ -11,10 +11,6 @@ scripts/
 .git/
 .gitignore
 
-# Documentation (keep README.md)
-*.md
-!README.md
-
 # IDE files
 .vscode/
 .idea/
