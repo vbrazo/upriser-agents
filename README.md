@@ -14,7 +14,7 @@ npm install @upriser/widget
 
 ```html
 <!-- Include directly in your HTML -->
-<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.6/dist/upriser-widget.js"></script>
 
 <!-- Or download and host yourself -->
 <script src="path/to/upriser-widget.js"></script>
@@ -90,7 +90,7 @@ widget.init();
     <!-- Your website content -->
     
     <!-- Include the Upriser widget script -->
-    <script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
+    <script src="https://unpkg.com/@vbrazo/widget@1.1.6/dist/upriser-widget.js"></script>
     
     <script>
         // The widget will auto-initialize with default settings
@@ -127,7 +127,7 @@ widget.init();
     // Disable auto-initialization if you want full control
     // window.UPRISER_DISABLE_AUTO_INIT = true;
 </script>
-<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.6/dist/upriser-widget.js"></script>
 ```
 
 #### WordPress Integration
@@ -142,7 +142,7 @@ function add_upriser_widget() {
             debug: <?php echo WP_DEBUG ? 'true' : 'false'; ?>
         };
     </script>
-    <script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
+    <script src="https://unpkg.com/@vbrazo/widget@1.1.6/dist/upriser-widget.js"></script>
     <?php
 }
 add_action('wp_footer', 'add_upriser_widget');
@@ -163,7 +163,7 @@ Upriser Widget now supports complete whitelabeling with custom branding and colo
 </upriser-convai>
 
 <!-- Load the script -->
-<script src="https://unpkg.com/@vbrazo/widget@1.1.4/dist/upriser-widget.js"></script>
+<script src="https://unpkg.com/@vbrazo/widget@1.1.6/dist/upriser-widget.js"></script>
 ```
 
 ### Custom Element Attributes
