@@ -1,0 +1,57 @@
+{
+  "name": "@upriser/widget",
+  "version": "1.0.0",
+  "description": "A standalone JavaScript widget for integrating Upriser ElevenLabs ConvAI into any website",
+  "main": "dist/upriser-widget.js",
+  "module": "dist/upriser-widget.esm.js",
+  "types": "dist/upriser-widget.d.ts",
+  "files": [
+    "dist/",
+    "src/",
+    "upriser-widget.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run build:raw && npm run build:umd && npm run build:esm && npm run build:types",
+    "build:raw": "node scripts/build-raw.js",
+    "build:umd": "node scripts/build-umd.js",
+    "build:esm": "node scripts/build-esm.js",
+    "build:types": "node scripts/build-types.js",
+    "prepublishOnly": "npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "dev": "node scripts/dev-server.js"
+  },
+  "keywords": [
+    "widget",
+    "chat",
+    "conversational-ai",
+    "elevenlabs",
+    "upriser",
+    "convai",
+    "voice",
+    "ai-assistant"
+  ],
+  "author": "Upriser",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/upriser/upriser-widget.git"
+  },
+  "bugs": {
+    "url": "https://github.com/upriser/upriser-widget/issues"
+  },
+  "homepage": "https://github.com/upriser/upriser-widget#readme",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

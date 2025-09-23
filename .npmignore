@@ -1,0 +1,39 @@
+# Source files (keep them for debugging/reference)
+# src/
+
+# Test files
+tests/
+jest.config.js
+coverage/
+
+# Development files
+scripts/
+.git/
+.gitignore
+
+# Documentation (keep README.md)
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies (users will install their own)
+node_modules/
+
+# Build artifacts (we include dist/ but not temp build files)
+*.tgz
+*.tar.gz
