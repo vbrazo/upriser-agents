@@ -2,7 +2,7 @@
  * Configuration options for the Upriser Widget
  */
 export interface UpriserWidgetConfig {
-  /** The ElevenLabs agent ID to use */
+  /** The Upriser agent ID to use */
   agentId?: string;
   /** Container element to append the widget to */
   widgetContainer?: HTMLElement | null;
@@ -23,7 +23,7 @@ export interface UpriserWidgetTestResult {
 }
 
 /**
- * Main Upriser Widget class for integrating ElevenLabs ConvAI
+ * Main Upriser Widget class for integrating Upriser ConvAI
  */
 export declare class UpriserWidget {
   /** Widget configuration */
@@ -60,13 +60,13 @@ export declare class UpriserWidget {
   init(): Promise<void>;
 
   /**
-   * Load the ElevenLabs ConvAI script
+   * Load the Upriser ConvAI script
    * @returns Promise that resolves when script is loaded
    */
   loadElevenLabsScript(): Promise<void>;
 
   /**
-   * Create the ConvAI element in the DOM
+   * Create the Upriser ConvAI element in the DOM
    */
   createConvAIElement(): void;
 

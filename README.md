@@ -1,6 +1,6 @@
 # Upriser Widget
 
-A standalone JavaScript widget for integrating Upriser ElevenLabs ConvAI into any website. This package provides both npm module support and raw JavaScript files for maximum flexibility.
+A standalone JavaScript widget for integrating Upriser ConvAI into any website. This package provides both npm module support and raw JavaScript files for maximum flexibility.
 
 ## Installation
 
@@ -154,8 +154,6 @@ Upriser Widget now supports complete whitelabeling with custom branding and colo
 
 ### Custom HTML Element
 
-Instead of using `<elevenlabs-convai>`, you can now use the whitelabel `<upriser-convai>` element:
-
 ```html
 <!-- NEW: Whitelabel custom element -->
 <upriser-convai 
@@ -172,7 +170,7 @@ Instead of using `<elevenlabs-convai>`, you can now use the whitelabel `<upriser
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `agent-id` | string | Required | ElevenLabs agent ID |
+| `agent-id` | string | Required | Upriser agent ID |
 | `font-color` | string | `#ffffff` | Color for "Powered by Upriser.ai" text |
 | `link-color` | string | `#ffffff` | Color for links to Upriser.ai |
 
@@ -231,35 +229,17 @@ widget.init();
 </upriser-convai>
 ```
 
-### Migration from elevenlabs-convai
-
-Migrating is simple - just replace the element name and add color attributes:
-
-```html
-<!-- OLD -->
-<elevenlabs-convai agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"></elevenlabs-convai>
-
-<!-- NEW -->
-<upriser-convai 
-    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
-    font-color="#ffffff"
-    link-color="#007bff">
-</upriser-convai>
-```
-
 ### Benefits of Whitelabel Version
 
-✅ **Complete Branding Control** - No ElevenLabs branding visible  
 ✅ **Custom Colors** - Match your brand colors exactly  
-✅ **Dynamic Updates** - Change colors on the fly  
-✅ **Backward Compatible** - Still works with elevenlabs-convai  
+✅ **Dynamic Updates** - Change colors on the fly
 ✅ **Better Events** - Enhanced event handling and API  
 
 ## Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `agentId` | string | `'agent_8401k5nnvgqpezf9fd17t3tb7t69'` | ElevenLabs agent ID to use |
+| `agentId` | string | `'agent_8401k5nnvgqpezf9fd17t3tb7t69'` | Upriser agent ID to use |
 | `widgetContainer` | HTMLElement \| null | `null` | Container to append widget to (defaults to document.body) |
 | `debug` | boolean | `false` | Enable debug logging |
 | `fontColor` | string | `'#ffffff'` | **NEW!** Custom color for "Powered by Upriser.ai" text |

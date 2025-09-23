@@ -1,7 +1,7 @@
 /**
  * Upriser Chat Widget
- * A standalone JavaScript module for integrating the Upriser ElevenLabs ConvAI widget
- * for integrating the Upriser ElevenLabs ConvAI widget into any website.
+ * A standalone JavaScript module for integrating the Upriser ConvAI widget
+ * for integrating the Upriser ConvAI widget into any website.
  * 
  * @version 1.0.0
  * @author Upriser
@@ -62,7 +62,7 @@ class UpriserWidget {
   }
 
   /**
-   * Load the ElevenLabs ConvAI script
+   * Load the Upriser ConvAI script
    */
   loadElevenLabsScript() {
       // Reuse a global promise to avoid race conditions and duplicate definitions
@@ -120,7 +120,7 @@ class UpriserWidget {
   }
 
   /**
-   * Create the ConvAI element
+   * Create the Upriser ConvAI element
    */
   createConvAIElement() {
       const container = this.config.widgetContainer || document.body;
@@ -215,12 +215,12 @@ class UpriserWidget {
 
           async init() {
               try {
-                  // Wait for elevenlabs-convai to be available
+                  // Wait for Upriser ConvAI to be available
                   if (!customElements.get('elevenlabs-convai')) {
                       await self.loadElevenLabsScript();
                   }
 
-                  // Create the elevenlabs-convai element
+                  // Create the Upriser ConvAI element
                   this.elevenLabsElement = document.createElement('elevenlabs-convai');
                   
                   // Copy attributes
