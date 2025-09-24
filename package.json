@@ -1,6 +1,6 @@
 {
   "name": "@upriser.ai/widget",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A standalone JavaScript widget for integrating Upriser ElevenLabs ConvAI into any website",
   "main": "dist/upriser-widget.js",
   "module": "dist/upriser-widget.esm.js",
