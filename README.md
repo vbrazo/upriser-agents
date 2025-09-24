@@ -7,7 +7,7 @@ A standalone JavaScript widget for integrating Upriser ConvAI into any website. 
 ### Option 1: NPM Package (Recommended for React, Vue, Angular, etc.)
 
 ```bash
-npm install @upriser/widget
+npm install @upriser.ai/widget
 ```
 
 ### Option 2: CDN / Direct Script Inclusion
@@ -27,7 +27,7 @@ npm install @upriser/widget
 #### ES Modules (Modern bundlers like Webpack, Vite, etc.)
 
 ```javascript
-import UpriserWidget from '@upriser/widget';
+import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 // Create and initialize the widget
 const widget = new UpriserWidget({
@@ -47,7 +47,7 @@ widget.init().then(() => {
 #### CommonJS (Node.js style)
 
 ```javascript
-const UpriserWidget = require('@upriser/widget');
+import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 const widget = new UpriserWidget({
   agentId: 'your-agent-id-here',
@@ -62,7 +62,7 @@ widget.init();
 The package includes full TypeScript definitions:
 
 ```typescript
-import UpriserWidget, { UpriserWidgetConfig } from '@upriser/widget';
+import UpriserWidget, { UpriserWidgetConfig } from '@upriser.ai/widget';
 
 const config: UpriserWidgetConfig = {
   agentId: 'your-agent-id-here'
@@ -156,7 +156,7 @@ Upriser Widget now supports complete whitelabeling with custom branding and colo
 </upriser-convai>
 
 <!-- Load the script -->
-<script src="https://unpkg.com/@vbrazo/widget"></script>
+<script src="https://unpkg.com/@upriser.ai/widget"></script>
 ```
 
 ### Custom Element Attributes
@@ -272,7 +272,7 @@ widget.destroy();
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import UpriserWidget from '@upriser/widget';
+import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 function ChatWidget({ agentId, debug = false }) {
   const widgetRef = useRef(null);
@@ -311,7 +311,7 @@ export default ChatWidget;
 </template>
 
 <script>
-import UpriserWidget from '@upriser/widget';
+import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 export default {
   name: 'UpriserChat',
