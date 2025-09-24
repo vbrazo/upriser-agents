@@ -14,7 +14,7 @@ npm install @upriser/widget
 
 ```html
 <!-- Include directly in your HTML -->
-<script src="https://unpkg.com/@vbrazo/widget"></script>
+<script src="https://unpkg.com/@upriser.ai/widget"></script>
 
 <!-- Or download and host yourself -->
 <script src="path/to/upriser-widget.js"></script>
@@ -32,8 +32,6 @@ import UpriserWidget from '@upriser/widget';
 // Create and initialize the widget
 const widget = new UpriserWidget({
   agentId: 'your-agent-id-here', // Optional: defaults to Upriser's agent
-  debug: true, // Optional: enable debug logging
-  widgetContainer: document.getElementById('chat-container'), // Optional: specify container
   fontColor: '#ffffff', // Optional: customize text color (NEW!)
   linkColor: '#007bff' // Optional: customize link color (NEW!)
 });
@@ -67,9 +65,7 @@ The package includes full TypeScript definitions:
 import UpriserWidget, { UpriserWidgetConfig } from '@upriser/widget';
 
 const config: UpriserWidgetConfig = {
-  agentId: 'your-agent-id-here',
-  debug: true,
-  widgetContainer: document.getElementById('chat-container')
+  agentId: 'your-agent-id-here'
 };
 
 const widget = new UpriserWidget(config);
@@ -90,7 +86,7 @@ widget.init();
     <!-- Your website content -->
     
     <!-- Include the Upriser widget script -->
-    <script src="https://unpkg.com/@vbrazo/widget"></script>
+    <script src="https://unpkg.com/@upriser.ai/widget"></script>
     
     <script>
         // The widget will auto-initialize with default settings
@@ -104,7 +100,6 @@ widget.init();
         // Option 2: Create your own instance
         const myWidget = new UpriserWidget({
             agentId: 'your-custom-agent-id',
-            debug: true,
             fontColor: '#ffffff',
             linkColor: '#007bff'
         });
@@ -120,14 +115,13 @@ widget.init();
 <script>
     // Configure before the script loads (for auto-initialization)
     window.UPRISER_WIDGET_CONFIG = {
-        agentId: 'your-agent-id-here',
-        debug: true
+        agentId: 'your-agent-id-here'
     };
     
     // Disable auto-initialization if you want full control
     // window.UPRISER_DISABLE_AUTO_INIT = true;
 </script>
-<script src="https://unpkg.com/@vbrazo/widget"></script>
+<script src="https://unpkg.com/@upriser.ai/widget"></script>
 ```
 
 #### WordPress Integration
@@ -138,11 +132,10 @@ function add_upriser_widget() {
     ?>
     <script>
         window.UPRISER_WIDGET_CONFIG = {
-            agentId: '<?php echo get_option('upriser_agent_id', 'agent_8401k5nnvgqpezf9fd17t3tb7t69'); ?>',
-            debug: <?php echo WP_DEBUG ? 'true' : 'false'; ?>
+            agentId: '<?php echo get_option('upriser_agent_id', 'agent_8401k5nnvgqpezf9fd17t3tb7t69'); ?>'
         };
     </script>
-    <script src="https://unpkg.com/@vbrazo/widget"></script>
+    <script src="https://unpkg.com/@upriser.ai/widget"></script>
     <?php
 }
 add_action('wp_footer', 'add_upriser_widget');
@@ -196,9 +189,8 @@ Use the UpriserWidget class with custom colors:
 ```javascript
 const widget = new UpriserWidget({
     agentId: 'agent_8401k5nnvgqpezf9fd17t3tb7t69',
-    fontColor: '#ffffff',  // Custom font color
-    linkColor: '#007bff',  // Custom link color
-    debug: false
+    fontColor: '#ffffff',
+    linkColor: '#007bff'
 });
 
 widget.init();
