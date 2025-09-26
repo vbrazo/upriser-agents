@@ -34,22 +34,22 @@ export interface UpriserWidgetTestResult {
 export declare class UpriserWidget {
   /** Widget configuration */
   config: UpriserWidgetConfig;
-  
+
   /** Whether the widget has been initialized */
   isInitialized: boolean;
-  
+
   /** Map of event handlers */
   eventHandlers: Map<string, Function>;
-  
+
   /** Mutation observer for DOM changes */
   mutationObserver: MutationObserver | null;
-  
+
   /** Map of active timeouts */
   timeouts: Map<string, number>;
-  
+
   /** Map of active intervals */
   intervals: Map<string, number>;
-  
+
   /** Whether relabeling process is complete */
   isRelabelingComplete: boolean;
 

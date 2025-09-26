@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Copy TypeScript definitions to dist
-const srcPath = path.join(__dirname, '../src/upriser-widget.d.ts');
-const distPath = path.join(__dirname, '../dist/upriser-widget.d.ts');
+const srcPath = path.join(__dirname, "../src/upriser-widget.d.ts");
+const distPath = path.join(__dirname, "../dist/upriser-widget.d.ts");
 
 // Ensure dist directory exists
 if (!fs.existsSync(path.dirname(distPath))) {
@@ -13,4 +13,4 @@ if (!fs.existsSync(path.dirname(distPath))) {
 // Copy the types file
 fs.copyFileSync(srcPath, distPath);
 
-console.log('✅ Types build completed: dist/upriser-widget.d.ts');
+console.log("✅ Types build completed: dist/upriser-widget.d.ts");

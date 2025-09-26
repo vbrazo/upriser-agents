@@ -31,17 +31,20 @@ import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 // Create and initialize the widget
 const widget = new UpriserWidget({
-  agentId: 'your-agent-id-here',
-  fontColor: '#ffffff',
-  linkColor: '#007bff'
+  agentId: "your-agent-id-here",
+  fontColor: "#ffffff",
+  linkColor: "#007bff",
 });
 
 // Initialize the widget
-widget.init().then(() => {
-  console.log('Upriser widget initialized successfully!');
-}).catch(error => {
-  console.error('Failed to initialize widget:', error);
-});
+widget
+  .init()
+  .then(() => {
+    console.log("Upriser widget initialized successfully!");
+  })
+  .catch((error) => {
+    console.error("Failed to initialize widget:", error);
+  });
 ```
 
 #### CommonJS (Node.js style)
@@ -50,8 +53,8 @@ widget.init().then(() => {
 import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 const widget = new UpriserWidget({
-  agentId: 'your-agent-id-here',
-  debug: false
+  agentId: "your-agent-id-here",
+  debug: false,
 });
 
 widget.init();
@@ -62,10 +65,10 @@ widget.init();
 The package includes full TypeScript definitions:
 
 ```typescript
-import UpriserWidget, { UpriserWidgetConfig } from '@upriser.ai/widget';
+import UpriserWidget, { UpriserWidgetConfig } from "@upriser.ai/widget";
 
 const config: UpriserWidgetConfig = {
-  agentId: 'your-agent-id-here'
+  agentId: "your-agent-id-here",
 };
 
 const widget = new UpriserWidget(config);
@@ -79,33 +82,33 @@ widget.init();
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>My Website</title>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Your website content -->
-    
+
     <!-- Include the Upriser widget script -->
     <script src="https://unpkg.com/@upriser.ai/widget"></script>
-    
+
     <script>
-        // The widget will auto-initialize with default settings
-        // Or manually initialize:
-        
-        // Option 1: Use the global instance (auto-created)
-        if (window.upriserWidget) {
-            console.log('Widget auto-initialized');
-        }
-        
-        // Option 2: Create your own instance
-        const myWidget = new UpriserWidget({
-            agentId: 'your-custom-agent-id',
-            fontColor: '#ffffff',
-            linkColor: '#007bff'
-        });
-        myWidget.init();
+      // The widget will auto-initialize with default settings
+      // Or manually initialize:
+
+      // Option 1: Use the global instance (auto-created)
+      if (window.upriserWidget) {
+        console.log("Widget auto-initialized");
+      }
+
+      // Option 2: Create your own instance
+      const myWidget = new UpriserWidget({
+        agentId: "your-custom-agent-id",
+        fontColor: "#ffffff",
+        linkColor: "#007bff",
+      });
+      myWidget.init();
     </script>
-</body>
+  </body>
 </html>
 ```
 
@@ -113,13 +116,13 @@ widget.init();
 
 ```html
 <script>
-    // Configure before the script loads (for auto-initialization)
-    window.UPRISER_WIDGET_CONFIG = {
-        agentId: 'your-agent-id-here'
-    };
-    
-    // Disable auto-initialization if you want full control
-    // window.UPRISER_DISABLE_AUTO_INIT = true;
+  // Configure before the script loads (for auto-initialization)
+  window.UPRISER_WIDGET_CONFIG = {
+    agentId: "your-agent-id-here",
+  };
+
+  // Disable auto-initialization if you want full control
+  // window.UPRISER_DISABLE_AUTO_INIT = true;
 </script>
 <script src="https://unpkg.com/@upriser.ai/widget"></script>
 ```
@@ -151,17 +154,17 @@ The widget includes a built-in modal system that can be triggered by the AI agen
 
 ```javascript
 const widget = new UpriserWidget({
-  agentId: 'your-agent-id',
+  agentId: "your-agent-id",
   clientTools: {
     show_demo_form: (parameters) => {
-      const url = parameters?.url || 'https://meetings.hubspot.com/default';
-      return widget.openModal({ 
-        url, 
-        title: 'Schedule a Demo',
-        onClose: () => console.log('Demo modal closed') 
+      const url = parameters?.url || "https://meetings.hubspot.com/default";
+      return widget.openModal({
+        url,
+        title: "Schedule a Demo",
+        onClose: () => console.log("Demo modal closed"),
       });
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -173,26 +176,26 @@ Client tools are JavaScript functions that the AI agent can call to perform spec
 // Option 1: Global client tools
 window.UPRISER_CLIENT_TOOLS = {
   show_demo_form: (parameters) => {
-    const url = parameters?.url || 'https://meetings.hubspot.com/default';
+    const url = parameters?.url || "https://meetings.hubspot.com/default";
     // Open your custom modal or use the built-in one
     return { success: true, message: "Demo form opened" };
   },
-  
+
   show_vehicle_page: (parameters) => {
     if (!parameters?.url) {
       return { success: false, message: "URL required" };
     }
     // Open vehicle details modal
     return { success: true, message: "Vehicle page opened" };
-  }
+  },
 };
 
 // Option 2: Widget configuration
 const widget = new UpriserWidget({
-  agentId: 'your-agent-id',
+  agentId: "your-agent-id",
   clientTools: {
     // Your client tools here
-  }
+  },
 });
 ```
 
@@ -203,10 +206,11 @@ Upriser Widget supports complete whitelabeling with custom branding and colors!
 ### Custom HTML Element
 
 ```html
-<upriser-convai 
-    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
-    font-color="#ffffff"
-    link-color="#007bff">
+<upriser-convai
+  agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+  font-color="#ffffff"
+  link-color="#007bff"
+>
 </upriser-convai>
 
 <script src="https://unpkg.com/@upriser.ai/widget"></script>
@@ -214,11 +218,11 @@ Upriser Widget supports complete whitelabeling with custom branding and colors!
 
 ### Custom Element Attributes
 
-| Attribute | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `agent-id` | string | Required | Upriser agent ID |
+| Attribute    | Type   | Default   | Description                            |
+| ------------ | ------ | --------- | -------------------------------------- |
+| `agent-id`   | string | Required  | Upriser agent ID                       |
 | `font-color` | string | `#ffffff` | Color for "Powered by Upriser.ai" text |
-| `link-color` | string | `#ffffff` | Color for links to Upriser.ai |
+| `link-color` | string | `#ffffff` | Color for links to Upriser.ai          |
 
 ### Dynamic Color Changes
 
@@ -226,11 +230,11 @@ You can change colors dynamically using JavaScript:
 
 ```javascript
 // Get the widget element
-const widget = document.querySelector('upriser-convai');
+const widget = document.querySelector("upriser-convai");
 
 // Change colors
-widget.setAttribute('font-color', '#ff6b6b');
-widget.setAttribute('link-color', '#4ecdc4');
+widget.setAttribute("font-color", "#ff6b6b");
+widget.setAttribute("link-color", "#4ecdc4");
 ```
 
 ### JavaScript Class with Colors
@@ -239,9 +243,9 @@ Use the UpriserWidget class with custom colors:
 
 ```javascript
 const widget = new UpriserWidget({
-    agentId: 'agent_8401k5nnvgqpezf9fd17t3tb7t69',
-    fontColor: '#ffffff',
-    linkColor: '#007bff'
+  agentId: "agent_8401k5nnvgqpezf9fd17t3tb7t69",
+  fontColor: "#ffffff",
+  linkColor: "#007bff",
 });
 
 widget.init();
@@ -251,47 +255,51 @@ widget.init();
 
 ```html
 <!-- Blue Theme -->
-<upriser-convai 
-    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
-    font-color="#ffffff"
-    link-color="#007bff">
+<upriser-convai
+  agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+  font-color="#ffffff"
+  link-color="#007bff"
+>
 </upriser-convai>
 
 <!-- Green Theme -->
-<upriser-convai 
-    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
-    font-color="#ffffff"
-    link-color="#28a745">
+<upriser-convai
+  agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+  font-color="#ffffff"
+  link-color="#28a745"
+>
 </upriser-convai>
 
 <!-- Purple Theme -->
-<upriser-convai 
-    agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
-    font-color="#f8f9fa"
-    link-color="#6f42c1">
+<upriser-convai
+  agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
+  font-color="#f8f9fa"
+  link-color="#6f42c1"
+>
 </upriser-convai>
 ```
 
 ### Benefits of Whitelabel Version
 
-✅ **Custom Colors** - Match your brand colors exactly  
-✅ **Dynamic Updates** - Change colors on the fly
-✅ **Better Events** - Enhanced event handling and API  
+- ✅ **Custom Colors** - Match your brand colors exactly
+- ✅ **Dynamic Updates** - Change colors on the fly
+- ✅ **Better Events** - Enhanced event handling and API
 
 ## Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `agentId` | string | `'agent_8401k5nnvgqpezf9fd17t3tb7t69'` | Upriser agent ID to use |
-| `widgetContainer` | HTMLElement \| null | `null` | Container to append widget to (defaults to document.body) |
-| `debug` | boolean | `false` | Enable debug logging |
-| `fontColor` | string | `'#ffffff'` | Custom color for "Powered by Upriser.ai" text |
-| `linkColor` | string | `'#ffffff'` | Custom color for links to Upriser.ai |
-| `clientTools` | Record<string, Function> | `{}` | **NEW!** Custom functions that the AI agent can call |
+| Option            | Type                     | Default                                | Description                                               |
+| ----------------- | ------------------------ | -------------------------------------- | --------------------------------------------------------- |
+| `agentId`         | string                   | `'agent_8401k5nnvgqpezf9fd17t3tb7t69'` | Upriser agent ID to use                                   |
+| `widgetContainer` | HTMLElement \| null      | `null`                                 | Container to append widget to (defaults to document.body) |
+| `debug`           | boolean                  | `false`                                | Enable debug logging                                      |
+| `fontColor`       | string                   | `'#ffffff'`                            | Custom color for "Powered by Upriser.ai" text             |
+| `linkColor`       | string                   | `'#ffffff'`                            | Custom color for links to Upriser.ai                      |
+| `clientTools`     | Record<string, Function> | `{}`                                   | **NEW!** Custom functions that the AI agent can call      |
 
 ## API Methods
 
 ### `widget.init()`
+
 Initializes the widget. Returns a Promise.
 
 ```javascript
@@ -299,63 +307,69 @@ await widget.init();
 ```
 
 ### `widget.updateConfig(newConfig)`
+
 Updates the widget configuration.
 
 ```javascript
-widget.updateConfig({ debug: true, agentId: 'new-agent-id' });
+widget.updateConfig({ debug: true, agentId: "new-agent-id" });
 ```
 
 ### `widget.test()`
+
 Tests widget functionality and returns status.
 
 ```javascript
 const status = widget.test();
-console.log('Widget status:', status);
+console.log("Widget status:", status);
 ```
 
 ### `widget.openModal(options)`
+
 **NEW!** Opens a modal with the specified URL and options.
 
 ```javascript
 const result = widget.openModal({
-  url: 'https://meetings.hubspot.com/demo',
-  title: 'Schedule a Demo',
-  onClose: () => console.log('Modal closed')
+  url: "https://meetings.hubspot.com/demo",
+  title: "Schedule a Demo",
+  onClose: () => console.log("Modal closed"),
 });
 console.log(result);
 // { success: true, message: "Modal opened successfully" }
 ```
 
 ### `widget.setClientTools(clientTools)`
+
 **NEW!** Updates the client tools available to the AI agent.
 
 ```javascript
 widget.setClientTools({
   show_demo_form: (parameters) => {
-    const url = parameters?.url || 'https://meetings.hubspot.com/default';
-    return widget.openModal({ url, title: 'Schedule Demo' });
+    const url = parameters?.url || "https://meetings.hubspot.com/default";
+    return widget.openModal({ url, title: "Schedule Demo" });
   },
   show_vehicle_page: (parameters) => {
     if (!parameters?.url) {
       return { success: false, message: "URL required" };
     }
-    return widget.openModal({ 
-      url: parameters.url, 
-      title: parameters.title || 'Vehicle Details' 
+    return widget.openModal({
+      url: parameters.url,
+      title: parameters.title || "Vehicle Details",
     });
-  }
+  },
 });
 ```
 
 ### `widget.getClientTools()`
+
 **NEW!** Returns the current client tools configuration.
 
 ```javascript
 const tools = widget.getClientTools();
-console.log('Available tools:', Object.keys(tools));
+console.log("Available tools:", Object.keys(tools));
 ```
 
 ### `widget.destroy()`
+
 Destroys the widget and cleans up all resources.
 
 ```javascript
@@ -365,7 +379,7 @@ widget.destroy();
 ## React Integration Example
 
 ```jsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 function ChatWidget({ agentId, debug = false }) {
@@ -377,7 +391,7 @@ function ChatWidget({ agentId, debug = false }) {
       const widget = new UpriserWidget({
         agentId,
         debug,
-        widgetContainer: containerRef.current
+        widgetContainer: containerRef.current,
       });
 
       widget.init().catch(console.error);
@@ -407,24 +421,24 @@ Perfect for sales teams and lead generation websites:
 // Setup demo scheduling client tools
 window.UPRISER_CLIENT_TOOLS = {
   show_demo_form: (parameters) => {
-    const url = parameters?.url || 'https://meetings.hubspot.com/default';
-    
+    const url = parameters?.url || "https://meetings.hubspot.com/default";
+
     // Use the built-in modal system
     if (window.upriserWidgetInstance) {
       return window.upriserWidgetInstance.openModal({
         url,
-        title: 'Schedule a Demo',
+        title: "Schedule a Demo",
         onClose: () => {
-          console.log('Demo modal closed');
+          console.log("Demo modal closed");
           // Track analytics
-        }
+        },
       });
     }
-    
+
     // Fallback to custom implementation
     openCustomDemoModal(url);
     return { success: true, message: "Demo form opened" };
-  }
+  },
 };
 
 // The AI agent can now call: "Let me show you our demo scheduling form"
@@ -441,28 +455,31 @@ window.UPRISER_CLIENT_TOOLS = {
   show_vehicle_page: (parameters) => {
     const url = parameters?.url;
     const title = parameters?.title || "Vehicle Details";
-    
+
     // Validate required parameters
-    if (!url || typeof url !== 'string') {
+    if (!url || typeof url !== "string") {
       console.warn("show_vehicle_page requires a valid URL");
       return { success: false, message: "Missing or invalid URL parameter" };
     }
-    
+
     // Use the built-in modal system
     if (window.upriserWidgetInstance) {
       return window.upriserWidgetInstance.openModal({
         url,
         title,
         onClose: () => {
-          console.log('Vehicle modal closed');
-        }
+          console.log("Vehicle modal closed");
+        },
       });
     }
-    
+
     // Fallback to new tab
-    window.open(url, '_blank', 'noopener,noreferrer');
-    return { success: true, message: 'Opened vehicle page in new tab (fallback)' };
-  }
+    window.open(url, "_blank", "noopener,noreferrer");
+    return {
+      success: true,
+      message: "Opened vehicle page in new tab (fallback)",
+    };
+  },
 };
 
 // The AI agent can now call: "Let me show you this vehicle"
@@ -476,11 +493,11 @@ You can also create completely custom modals:
 ```javascript
 window.UPRISER_CLIENT_TOOLS = {
   show_product_catalog: (parameters) => {
-    const category = parameters?.category || 'all';
-    const searchTerm = parameters?.search || '';
-    
+    const category = parameters?.category || "all";
+    const searchTerm = parameters?.search || "";
+
     // Create custom modal content
-    const modalContent = document.createElement('div');
+    const modalContent = document.createElement("div");
     modalContent.innerHTML = `
       <div class="product-catalog">
         <h2>Product Catalog</h2>
@@ -490,8 +507,8 @@ window.UPRISER_CLIENT_TOOLS = {
         <div class="category-filter">
           <select>
             <option value="all">All Categories</option>
-            <option value="electronics" ${category === 'electronics' ? 'selected' : ''}>Electronics</option>
-            <option value="clothing" ${category === 'clothing' ? 'selected' : ''}>Clothing</option>
+            <option value="electronics" ${category === "electronics" ? "selected" : ""}>Electronics</option>
+            <option value="clothing" ${category === "clothing" ? "selected" : ""}>Clothing</option>
           </select>
         </div>
         <div class="products-grid">
@@ -499,22 +516,22 @@ window.UPRISER_CLIENT_TOOLS = {
         </div>
       </div>
     `;
-    
+
     // Use built-in modal with custom content
     if (window.upriserWidgetInstance) {
       const modal = window.upriserWidgetInstance.createModal({
-        title: 'Product Catalog',
+        title: "Product Catalog",
         content: modalContent,
-        className: 'product-catalog-modal'
+        className: "product-catalog-modal",
       });
-      
+
       if (modal) {
         return { success: true, message: "Product catalog opened" };
       }
     }
-    
+
     return { success: false, message: "Failed to open catalog" };
-  }
+  },
 };
 ```
 
@@ -529,40 +546,40 @@ window.UPRISER_CLIENT_TOOLS = {
 import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 export default {
-  name: 'UpriserChat',
+  name: "UpriserChat",
   props: {
     agentId: {
       type: String,
-      default: 'agent_8401k5nnvgqpezf9fd17t3tb7t69'
+      default: "agent_8401k5nnvgqpezf9fd17t3tb7t69",
     },
     debug: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      widget: null
+      widget: null,
     };
   },
   async mounted() {
     this.widget = new UpriserWidget({
       agentId: this.agentId,
       debug: this.debug,
-      widgetContainer: this.$refs.chatContainer
+      widgetContainer: this.$refs.chatContainer,
     });
-    
+
     try {
       await this.widget.init();
     } catch (error) {
-      console.error('Failed to initialize Upriser widget:', error);
+      console.error("Failed to initialize Upriser widget:", error);
     }
   },
   beforeUnmount() {
     if (this.widget) {
       this.widget.destroy();
     }
-  }
+  },
 };
 </script>
 ```
@@ -575,20 +592,20 @@ The widget dispatches custom events that you can listen for:
 
 ```javascript
 // Listen for modal opened events
-window.addEventListener('upriser:modal-opened', (event) => {
-  console.log('Modal opened:', event.detail);
-  
+window.addEventListener("upriser:modal-opened", (event) => {
+  console.log("Modal opened:", event.detail);
+
   // Track analytics based on modal type
-  if (event.detail.type === 'demo') {
+  if (event.detail.type === "demo") {
     // ...
-  } else if (event.detail.type === 'vehicle') {
+  } else if (event.detail.type === "vehicle") {
     // ...
   }
 });
 
-// Listen for modal closed events  
-window.addEventListener('upriser:modal-closed', (event) => {
-  console.log('Modal closed:', event.detail);
+// Listen for modal closed events
+window.addEventListener("upriser:modal-closed", (event) => {
+  console.log("Modal closed:", event.detail);
 
   // you could track analytics here
 });
@@ -598,20 +615,22 @@ window.addEventListener('upriser:modal-closed', (event) => {
 
 ```javascript
 // Listen for widget initialization
-window.addEventListener('upriser:initialized', (event) => {
-  console.log('Widget initialized:', event.detail);
-  
+window.addEventListener("upriser:initialized", (event) => {
+  console.log("Widget initialized:", event.detail);
+
   // Widget is ready, you can now safely call client tools
   const tools = event.detail.element.getClientTools();
-  console.log('Available client tools:', Object.keys(tools));
+  console.log("Available client tools:", Object.keys(tools));
 });
 
 // Listen for widget errors
-window.addEventListener('upriser:error', (event) => {
-  console.error('Widget error:', event.detail.error);
-  
+window.addEventListener("upriser:error", (event) => {
+  console.error("Widget error:", event.detail.error);
+
   // Handle errors gracefully
-  showErrorMessage('Chat widget encountered an error. Please refresh the page.');
+  showErrorMessage(
+    "Chat widget encountered an error. Please refresh the page.",
+  );
 });
 ```
 
@@ -622,38 +641,41 @@ window.addEventListener('upriser:error', (event) => {
 window.UPRISER_CLIENT_TOOLS = {
   show_demo_form: (parameters) => {
     try {
-      const url = parameters?.url || 'https://meetings.hubspot.com/default';
-      
+      const url = parameters?.url || "https://meetings.hubspot.com/default";
+
       // Attempt to open modal
       if (window.upriserWidgetInstance) {
         const result = window.upriserWidgetInstance.openModal({
           url,
-          title: 'Schedule a Demo'
+          title: "Schedule a Demo",
         });
-        
+
         if (result.success) {
           // Dispatch custom success event
-          window.dispatchEvent(new CustomEvent('upriser:demo-opened', {
-            detail: { url, timestamp: Date.now() }
-          }));
+          window.dispatchEvent(
+            new CustomEvent("upriser:demo-opened", {
+              detail: { url, timestamp: Date.now() },
+            }),
+          );
         }
-        
+
         return result;
       }
-      
+
       return { success: false, message: "Widget not available" };
-      
     } catch (error) {
-      console.error('Error in show_demo_form:', error);
-      
+      console.error("Error in show_demo_form:", error);
+
       // Dispatch error event
-      window.dispatchEvent(new CustomEvent('upriser:client-tool-error', {
-        detail: { tool: 'show_demo_form', error: error.message }
-      }));
-      
+      window.dispatchEvent(
+        new CustomEvent("upriser:client-tool-error", {
+          detail: { tool: "show_demo_form", error: error.message },
+        }),
+      );
+
       return { success: false, message: "Failed to open demo form" };
     }
-  }
+  },
 };
 ```
 

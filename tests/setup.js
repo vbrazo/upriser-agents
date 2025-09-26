@@ -20,7 +20,7 @@ global.console = {
 };
 
 // Setup document body
-document.body.innerHTML = '';
+document.body.innerHTML = "";
 
 // Mock customElements for web components
 global.customElements = {

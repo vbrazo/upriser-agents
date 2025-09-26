@@ -1,843 +1,1164 @@
 class UpriserWidget {
   constructor(e = {}) {
-      (this.config = {
-          agentId: "agent_8401k5nnvgqpezf9fd17t3tb7t69",
-          widgetContainer: e.widgetContainer || null,
-          debug: e.debug || !1,
-          fontColor: e.fontColor || "#ffffff",
-          linkColor: e.linkColor || "#ffffff",
-          clientTools: e.clientTools || {},
-          ...e,
-      }),
-          (this.isInitialized = !1),
-          (this.eventHandlers = new Map()),
-          (this.mutationObserver = null),
-          (this.timeouts = new Map()),
-          (this.intervals = new Map()),
-          (this.isRelabelingComplete = !1),
-          (this.currentModal = null),
-          (this.modalCounter = 0);
+    ((this.config = {
+      agentId: "agent_8401k5nnvgqpezf9fd17t3tb7t69",
+      widgetContainer: e.widgetContainer || null,
+      debug: e.debug || !1,
+      fontColor: e.fontColor || "#ffffff",
+      linkColor: e.linkColor || "#ffffff",
+      clientTools: e.clientTools || {},
+      ...e,
+    }),
+      (this.isInitialized = !1),
+      (this.eventHandlers = new Map()),
+      (this.mutationObserver = null),
+      (this.timeouts = new Map()),
+      (this.intervals = new Map()),
+      (this.isRelabelingComplete = !1),
+      (this.currentModal = null),
+      (this.modalCounter = 0));
   }
   async init() {
-      if (this.isInitialized) this.log("Widget already initialized");
-      else
-          try {
-              await this.loadElevenLabsScript(),
-                  this.defineUpriserConvAIElement(),
-                  "undefined" != typeof customElements && customElements.get("upriser-convai") ? this.createUpriserConvAIElement() : this.createConvAIElement(),
-                  this.startRelabelFlow(),
-                  this.startAutoAcceptFlow(),
-                  this.setupClientTools(),
-                  (this.isInitialized = !0),
-                  this.log("Widget initialized successfully");
-          } catch (e) {
-              throw (console.error("Failed to initialize Upriser Widget:", e), e);
-          }
+    if (this.isInitialized) this.log("Widget already initialized");
+    else
+      try {
+        (await this.loadElevenLabsScript(),
+          this.defineUpriserConvAIElement(),
+          "undefined" != typeof customElements &&
+          customElements.get("upriser-convai")
+            ? this.createUpriserConvAIElement()
+            : this.createConvAIElement(),
+          this.startRelabelFlow(),
+          this.startAutoAcceptFlow(),
+          this.setupClientTools(),
+          (this.isInitialized = !0),
+          this.log("Widget initialized successfully"));
+      } catch (e) {
+        throw (console.error("Failed to initialize Upriser Widget:", e), e);
+      }
   }
   loadElevenLabsScript() {
-      if ("undefined" != typeof window && window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE) return window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE;
-      if ("undefined" != typeof customElements && customElements.get("elevenlabs-convai")) return Promise.resolve();
-      const e = document.querySelector('script[data-upriser-agent="true"], script[src*="@elevenlabs/convai-widget-embed"]'),
-          t = new Promise((t, i) => {
-              if (e) {
-                  if ((this.log("ElevenLabs script tag already present"), "undefined" != typeof customElements && customElements.get("elevenlabs-convai"))) return void t();
-                  e.addEventListener && e.addEventListener("load", () => t());
-                  const i = setInterval(() => {
-                      "undefined" != typeof customElements && customElements.get("elevenlabs-convai") && (clearInterval(i), t());
-                  }, 50);
-                  return void setTimeout(() => {
-                      clearInterval(i), t();
-                  }, 5e3);
-              }
-              const n = document.createElement("script");
-              (n.src = "https://unpkg.com/@elevenlabs/convai-widget-embed@0.2.0/dist/index.js"),
-                  (n.async = !0),
-                  n.setAttribute("data-upriser-agent", "true"),
-                  (n.onload = () => {
-                      this.log("ElevenLabs script loaded successfully"), t();
-                  }),
-                  (n.onerror = () => {
-                      i(new Error("Failed to load ElevenLabs script"));
-                  }),
-                  document.head.appendChild(n);
-          });
-      return "undefined" != typeof window && (window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE = t), t;
+    if (
+      "undefined" != typeof window &&
+      window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE
+    )
+      return window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE;
+    if (
+      "undefined" != typeof customElements &&
+      customElements.get("elevenlabs-convai")
+    )
+      return Promise.resolve();
+    const e = document.querySelector(
+        'script[data-upriser-agent="true"], script[src*="@elevenlabs/convai-widget-embed"]',
+      ),
+      t = new Promise((t, i) => {
+        if (e) {
+          if (
+            (this.log("ElevenLabs script tag already present"),
+            "undefined" != typeof customElements &&
+              customElements.get("elevenlabs-convai"))
+          )
+            return void t();
+          e.addEventListener && e.addEventListener("load", () => t());
+          const i = setInterval(() => {
+            "undefined" != typeof customElements &&
+              customElements.get("elevenlabs-convai") &&
+              (clearInterval(i), t());
+          }, 50);
+          return void setTimeout(() => {
+            (clearInterval(i), t());
+          }, 5e3);
+        }
+        const n = document.createElement("script");
+        ((n.src =
+          "https://unpkg.com/@elevenlabs/convai-widget-embed@0.2.0/dist/index.js"),
+          (n.async = !0),
+          n.setAttribute("data-upriser-agent", "true"),
+          (n.onload = () => {
+            (this.log("ElevenLabs script loaded successfully"), t());
+          }),
+          (n.onerror = () => {
+            i(new Error("Failed to load ElevenLabs script"));
+          }),
+          document.head.appendChild(n));
+      });
+    return (
+      "undefined" != typeof window &&
+        (window.__UPRISER_ELEVENLABS_SCRIPT_PROMISE = t),
+      t
+    );
   }
   createConvAIElement() {
-      const e = this.config.widgetContainer || document.body,
-          t = e.querySelector("elevenlabs-convai");
-      t && t.remove();
-      const i = document.createElement("elevenlabs-convai");
-      i.setAttribute("agent-id", this.config.agentId), e.appendChild(i), this.log("ConvAI element created with agent ID:", this.config.agentId);
+    const e = this.config.widgetContainer || document.body,
+      t = e.querySelector("elevenlabs-convai");
+    t && t.remove();
+    const i = document.createElement("elevenlabs-convai");
+    (i.setAttribute("agent-id", this.config.agentId),
+      e.appendChild(i),
+      this.log("ConvAI element created with agent ID:", this.config.agentId));
   }
   createUpriserConvAIElement() {
-      const e = this.config.widgetContainer || document.body,
-          t = e.querySelector("upriser-convai");
-      t && t.remove();
-      const i = document.createElement("upriser-convai");
-      i.setAttribute("agent-id", this.config.agentId),
-          i.setAttribute("font-color", this.config.fontColor),
-          i.setAttribute("link-color", this.config.linkColor),
-          e.appendChild(i),
-          this.log("Upriser ConvAI element created with agent ID:", this.config.agentId);
+    const e = this.config.widgetContainer || document.body,
+      t = e.querySelector("upriser-convai");
+    t && t.remove();
+    const i = document.createElement("upriser-convai");
+    (i.setAttribute("agent-id", this.config.agentId),
+      i.setAttribute("font-color", this.config.fontColor),
+      i.setAttribute("link-color", this.config.linkColor),
+      e.appendChild(i),
+      this.log(
+        "Upriser ConvAI element created with agent ID:",
+        this.config.agentId,
+      ));
   }
   defineUpriserConvAIElement() {
-      if ("undefined" == typeof customElements) return void this.log("Custom elements not supported");
-      if (customElements.get("upriser-convai")) return void this.log("upriser-convai element already defined");
-      const e = this;
-      class t extends HTMLElement {
-          constructor() {
-              super(), (this.elevenLabsElement = null), (this.initialized = !1);
-          }
-          connectedCallback() {
-              this.initialized || this.init();
-          }
-          disconnectedCallback() {
-              this.elevenLabsElement && this.elevenLabsElement.remove();
-          }
-          static get observedAttributes() {
-              return ["agent-id", "font-color", "link-color"];
-          }
-          attributeChangedCallback(t, i, n) {
-              this.elevenLabsElement &&
-                  i !== n &&
-                  ("agent-id" === t
-                      ? this.elevenLabsElement.setAttribute("agent-id", n)
-                      : ("font-color" !== t && "link-color" !== t) || (e.config && ("font-color" === t && (e.config.fontColor = n), "link-color" === t && (e.config.linkColor = n), setTimeout(() => e.attemptRelabelEverywhere(), 100))));
-          }
-          async init() {
-              try {
-                  customElements.get("elevenlabs-convai") || (await e.loadElevenLabsScript()), (this.elevenLabsElement = document.createElement("elevenlabs-convai"));
-                  const t = this.getAttribute("agent-id") || e.config.agentId;
-                  this.elevenLabsElement.setAttribute("agent-id", t);
-                  for (const e of this.attributes) ["font-color", "link-color"].includes(e.name) || this.elevenLabsElement.setAttribute(e.name, e.value);
-                  (this.elevenLabsElement.style.cssText = this.style.cssText), this.appendChild(this.elevenLabsElement), (this.initialized = !0);
-                  const i = this.getAttribute("font-color"),
-                      n = this.getAttribute("link-color");
-                  i && (e.config.fontColor = i),
-                      n && (e.config.linkColor = n),
-                      e.log("upriser-convai element initialized"),
-                      this.dispatchEvent(new CustomEvent("upriser:initialized", { bubbles: !0, detail: { element: this, agentId: t } }));
-              } catch (e) {
-                  console.error("Failed to initialize upriser-convai element:", e), this.dispatchEvent(new CustomEvent("upriser:error", { bubbles: !0, detail: { error: e, element: this } }));
-              }
-          }
-          show() {
-              if (this.elevenLabsElement && "function" == typeof this.elevenLabsElement.show) return this.elevenLabsElement.show();
-          }
-          hide() {
-              if (this.elevenLabsElement && "function" == typeof this.elevenLabsElement.hide) return this.elevenLabsElement.hide();
-          }
-          toggle() {
-              if (this.elevenLabsElement && "function" == typeof this.elevenLabsElement.toggle) return this.elevenLabsElement.toggle();
-          }
-          destroy() {
-              this.elevenLabsElement && (this.elevenLabsElement.remove(), (this.elevenLabsElement = null)), (this.initialized = !1);
-          }
+    if ("undefined" == typeof customElements)
+      return void this.log("Custom elements not supported");
+    if (customElements.get("upriser-convai"))
+      return void this.log("upriser-convai element already defined");
+    const e = this;
+    class t extends HTMLElement {
+      constructor() {
+        (super(), (this.elevenLabsElement = null), (this.initialized = !1));
       }
-      try {
-          customElements.define("upriser-convai", t), this.log("upriser-convai custom element defined successfully");
-      } catch (e) {
-          console.error("Failed to define upriser-convai custom element:", e);
+      connectedCallback() {
+        this.initialized || this.init();
       }
+      disconnectedCallback() {
+        this.elevenLabsElement && this.elevenLabsElement.remove();
+      }
+      static get observedAttributes() {
+        return ["agent-id", "font-color", "link-color"];
+      }
+      attributeChangedCallback(t, i, n) {
+        this.elevenLabsElement &&
+          i !== n &&
+          ("agent-id" === t
+            ? this.elevenLabsElement.setAttribute("agent-id", n)
+            : ("font-color" !== t && "link-color" !== t) ||
+              (e.config &&
+                ("font-color" === t && (e.config.fontColor = n),
+                "link-color" === t && (e.config.linkColor = n),
+                setTimeout(() => e.attemptRelabelEverywhere(), 100))));
+      }
+      async init() {
+        try {
+          (customElements.get("elevenlabs-convai") ||
+            (await e.loadElevenLabsScript()),
+            (this.elevenLabsElement =
+              document.createElement("elevenlabs-convai")));
+          const t = this.getAttribute("agent-id") || e.config.agentId;
+          this.elevenLabsElement.setAttribute("agent-id", t);
+          for (const e of this.attributes)
+            ["font-color", "link-color"].includes(e.name) ||
+              this.elevenLabsElement.setAttribute(e.name, e.value);
+          ((this.elevenLabsElement.style.cssText = this.style.cssText),
+            this.appendChild(this.elevenLabsElement),
+            (this.initialized = !0));
+          const i = this.getAttribute("font-color"),
+            n = this.getAttribute("link-color");
+          (i && (e.config.fontColor = i),
+            n && (e.config.linkColor = n),
+            e.log("upriser-convai element initialized"),
+            this.dispatchEvent(
+              new CustomEvent("upriser:initialized", {
+                bubbles: !0,
+                detail: { element: this, agentId: t },
+              }),
+            ));
+        } catch (e) {
+          (console.error("Failed to initialize upriser-convai element:", e),
+            this.dispatchEvent(
+              new CustomEvent("upriser:error", {
+                bubbles: !0,
+                detail: { error: e, element: this },
+              }),
+            ));
+        }
+      }
+      show() {
+        if (
+          this.elevenLabsElement &&
+          "function" == typeof this.elevenLabsElement.show
+        )
+          return this.elevenLabsElement.show();
+      }
+      hide() {
+        if (
+          this.elevenLabsElement &&
+          "function" == typeof this.elevenLabsElement.hide
+        )
+          return this.elevenLabsElement.hide();
+      }
+      toggle() {
+        if (
+          this.elevenLabsElement &&
+          "function" == typeof this.elevenLabsElement.toggle
+        )
+          return this.elevenLabsElement.toggle();
+      }
+      destroy() {
+        (this.elevenLabsElement &&
+          (this.elevenLabsElement.remove(), (this.elevenLabsElement = null)),
+          (this.initialized = !1));
+      }
+    }
+    try {
+      (customElements.define("upriser-convai", t),
+        this.log("upriser-convai custom element defined successfully"));
+    } catch (e) {
+      console.error("Failed to define upriser-convai custom element:", e);
+    }
   }
   relabelAndRewriteLinks(e) {
-      try {
-          if (!e) return !1;
-          let t = !1;
-          if (!document.querySelector("#upriser-chat-styles")) {
-              const i = document.createElement("style");
-              if (
-                  ((i.id = "upriser-chat-styles"),
-                  (i.textContent = `\n                  .bg-base.shrink-0.flex.gap-2.p-4.items-start {\n                      align-items: center !important;\n                  }\n                  .bg-base.shrink-0[class*="items-start"] {\n                      align-items: center !important;\n                  }\n                  .bg-base.items-start {\n                      align-items: center !important;\n                  }\n                  /* Apply linkColor to all links within the widget */\n                  elevenlabs-convai a, \n                  upriser-convai a,\n                  elevenlabs-convai a:visited,\n                  upriser-convai a:visited,\n                  elevenlabs-convai a:hover,\n                  upriser-convai a:hover,\n                  elevenlabs-convai a:focus,\n                  upriser-convai a:focus {\n                      color: ${this.config.linkColor} !important;\n                      opacity: 1 !important;\n                  }\n                  \n                  /* Remove opacity classes that make links gray */\n                  elevenlabs-convai a.opacity-30,\n                  upriser-convai a.opacity-30,\n                  elevenlabs-convai a.opacity-50,\n                  upriser-convai a.opacity-50,\n                  elevenlabs-convai a.opacity-70,\n                  upriser-convai a.opacity-70 {\n                      opacity: 1 !important;\n                  }\n              `),
-                  e.appendChild)
-              )
-                  try {
-                      e.appendChild(i), (t = !0);
-                  } catch {
-                      document.head.querySelector("#upriser-chat-styles") || (document.head.appendChild(i), (t = !0));
-                  }
-              else document.head.querySelector("#upriser-chat-styles") || (document.head.appendChild(i), (t = !0));
-          }
-          (e.querySelectorAll ? e.querySelectorAll("img") : []).forEach((e) => {
-              const i = e.src || e.getAttribute("src") || "";
-              "true" !== e.getAttribute("data-upriser-protected") &&
-                  "true" !== e.getAttribute("data-upriser-conversation-logo") &&
-                  i.includes("data:image") &&
-                  !i.includes("https://hotelvee.upriser.ai/upriser-logo.svg") &&
-                  ((e.src = "https://hotelvee.upriser.ai/upriser-logo.svg"), e.setAttribute("alt", "Upriser AI Assistant"), e.setAttribute("data-upriser-replaced", "true"), (t = !0));
-          }),
-              (e.querySelectorAll ? e.querySelectorAll("*") : []).forEach((e) => {
-                  const i = getComputedStyle(e).backgroundImage || e.style.backgroundImage || "";
-                  i.includes("data:image") &&
-                      !i.includes("https://hotelvee.upriser.ai/upriser-logo.svg") &&
-                      ((e.style.backgroundImage = "url(https://hotelvee.upriser.ai/upriser-logo.svg)"),
-                      (e.style.backgroundSize = "contain"),
-                      (e.style.backgroundPosition = "center"),
-                      (e.style.backgroundRepeat = "no-repeat"),
-                      e.setAttribute("data-upriser-bg-replaced", "true"),
-                      (t = !0));
-              });
-          let i = !1;
+    try {
+      if (!e) return !1;
+      let t = !1;
+      if (!document.querySelector("#upriser-chat-styles")) {
+        const i = document.createElement("style");
+        if (
+          ((i.id = "upriser-chat-styles"),
+          (i.textContent = `\n                  .bg-base.shrink-0.flex.gap-2.p-4.items-start {\n                      align-items: center !important;\n                  }\n                  .bg-base.shrink-0[class*="items-start"] {\n                      align-items: center !important;\n                  }\n                  .bg-base.items-start {\n                      align-items: center !important;\n                  }\n                  /* Apply linkColor to all links within the widget */\n                  elevenlabs-convai a, \n                  upriser-convai a,\n                  elevenlabs-convai a:visited,\n                  upriser-convai a:visited,\n                  elevenlabs-convai a:hover,\n                  upriser-convai a:hover,\n                  elevenlabs-convai a:focus,\n                  upriser-convai a:focus {\n                      color: ${this.config.linkColor} !important;\n                      opacity: 1 !important;\n                  }\n                  \n                  /* Remove opacity classes that make links gray */\n                  elevenlabs-convai a.opacity-30,\n                  upriser-convai a.opacity-30,\n                  elevenlabs-convai a.opacity-50,\n                  upriser-convai a.opacity-50,\n                  elevenlabs-convai a.opacity-70,\n                  upriser-convai a.opacity-70 {\n                      opacity: 1 !important;\n                  }\n              `),
+          e.appendChild)
+        )
           try {
-              i = "true" === sessionStorage.getItem("upriser-conversation-started");
+            (e.appendChild(i), (t = !0));
           } catch {
-              i = !0 === window.upriserConversationStarted;
+            document.head.querySelector("#upriser-chat-styles") ||
+              (document.head.appendChild(i), (t = !0));
           }
-          (e.querySelectorAll ? e.querySelectorAll('.relative.shrink-0.w-48.h-48, [class*="relative"][class*="w-48"][class*="h-48"]') : []).forEach((e) => {
-              e.querySelectorAll('.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover, [class*="absolute"][class*="inset-0"][class*="rounded-full"][class*="bg-cover"]').forEach((e) => {
-                  e.style.display = "none";
-              }),
-                  e.querySelectorAll('.el-wave-overlay, canvas, [class*="wave"]').forEach((e) => {
-                      e.style.display = "none";
-                  });
-              const i = e.querySelector(".absolute.inset-0.rounded-full.bg-base-border"),
-                  n = e.getAttribute("data-upriser-hidden-conversation"),
-                  r = "none" !== e.style.display;
-              if (i && !n && r && !e.getAttribute("data-upriser-logo-added")) {
-                  const i = document.createElement("img");
-                  (i.src = "https://hotelvee.upriser.ai/upriser-logo.svg"),
-                      (i.alt = "Upriser AI Assistant"),
-                      (i.style.cssText =
-                          "\n                      position: absolute;\n                      inset: 0;\n                      width: 100%;\n                      height: 100%;\n                      object-fit: contain;\n                      padding: 20%;\n                      z-index: 100;\n                  "),
-                      i.setAttribute("data-upriser-logo", "true"),
-                      i.setAttribute("data-upriser-protected", "true"),
-                      e.appendChild(i),
-                      e.setAttribute("data-upriser-logo-added", "true"),
-                      (t = !0);
-              }
-          });
-          const n = e.querySelectorAll ? e.querySelectorAll('[class*="justify-end"]') : [],
-              r = e.querySelectorAll ? e.querySelectorAll('[class*="bg-accent"]') : [],
-              o = e.querySelectorAll ? e.querySelectorAll('[class*="pl-16"]') : [],
-              s = e.querySelectorAll ? e.querySelectorAll('[class*="text-accent-primary"]') : [];
-          return (
-              (n.length > 0 || r.length > 0 || o.length > 0 || s.length > 0) &&
-                  ((e.querySelectorAll ? e.querySelectorAll(".bg-base.shrink-0.flex.gap-2.p-4") : []).forEach((i) => {
-                      const n = i.querySelector(".animate-text");
-                      if (n && n.textContent && n.textContent.includes("Chatting with AI Agent") && !i.getAttribute("data-upriser-hidden")) {
-                          (i.style.transition = "opacity 0.3s ease-out"),
-                              (i.style.opacity = "0"),
-                              setTimeout(() => {
-                                  i.style.display = "none";
-                              }, 300),
-                              i.setAttribute("data-upriser-hidden", "true"),
-                              (t = !0),
-                              (e.querySelectorAll ? e.querySelectorAll('.relative.shrink-0.w-48.h-48, [class*="relative"][class*="w-48"][class*="h-48"]') : []).forEach((e) => {
-                                  (e.style.display = "none"), e.setAttribute("data-upriser-hidden-conversation", "true");
-                              });
-                          try {
-                              sessionStorage.setItem("upriser-conversation-started", "true");
-                          } catch {
-                              window.upriserConversationStarted = !0;
-                          }
-                      }
-                  }),
-                  (e.querySelectorAll ? e.querySelectorAll('.px-4.pb-3.grow.flex.flex-col.gap-3, [class*="px-4"][class*="pb-3"][class*="grow"][class*="flex-col"]') : []).forEach((e) => {
-                      e.getAttribute("data-upriser-padded") || ((e.style.paddingTop = "15px"), e.setAttribute("data-upriser-padded", "true"), (t = !0));
-                  })),
-              (e.querySelectorAll ? e.querySelectorAll('.bg-base.shrink-0, .bg-base.items-start, [class*="bg-base"][class*="items-start"]') : []).forEach((e) => {
-                  e.classList.contains("items-start") && !e.getAttribute("data-upriser-centered") && (e.style.setProperty("align-items", "center", "important"), e.setAttribute("data-upriser-centered", "true"), (t = !0));
-              }),
-              (e.querySelectorAll ? e.querySelectorAll("span.opacity-30, .opacity-30") : []).forEach((e) => {
-                  if ("Powered by ElevenLabs" === (e.textContent ? e.textContent.trim() : "")) {
-                      if ("true" === e.getAttribute("data-upriser-branded")) return;
-                      (e.textContent = "Powered by Upriser.ai"),
-                          (e.style.fontFamily = "Plus Jakarta Sans, sans-serif"),
-                          e.classList.remove("opacity-30", "opacity-50", "opacity-70"),
-                          e.classList.add("upriser-white"),
-                          e.setAttribute("data-upriser-branded", "true"),
-                          e.style.setProperty("color", this.config.fontColor, "important"),
-                          e.style.setProperty("opacity", "1", "important"),
-                          (t = !0);
-                  }
-              }),
-              (e.querySelectorAll ? e.querySelectorAll("a[href]") : []).forEach((e) => {
-                  const i = e.getAttribute("href") || "",
-                      n = (e.textContent || "").trim();
-                  if (
-                      (e.getAttribute("data-upriser-color-applied") ||
-                          (e.style.setProperty("color", this.config.linkColor, "important"),
-                          e.style.setProperty("opacity", "1", "important"),
-                          e.classList.remove("opacity-30", "opacity-50", "opacity-70"),
-                          e.setAttribute("data-upriser-color-applied", "true"),
-                          (t = !0)),
-                      i.includes("elevenlabs") || "Conversational AI" === n || n.includes("ElevenLabs"))
-                  ) {
-                      if ("true" === e.getAttribute("data-upriser-processed")) return;
-                      (e.style.fontFamily = "Plus Jakarta Sans, sans-serif"),
-                          e.setAttribute("href", "https://www.upriser.ai"),
-                          e.setAttribute("target", "_blank"),
-                          e.setAttribute("rel", "noopener noreferrer"),
-                          e.setAttribute("data-upriser-processed", "true");
-                      const i = e.cloneNode(!0);
-                      e.parentNode.replaceChild(i, e),
-                          i.addEventListener(
-                              "click",
-                              (e) => {
-                                  try {
-                                      e.preventDefault();
-                                  } catch {}
-                                  try {
-                                      window.open("https://www.upriser.ai", "_blank", "noopener,noreferrer");
-                                  } catch {
-                                      window.location.href = "https://www.upriser.ai";
-                                  }
-                              },
-                              { once: !0 }
-                          ),
-                          n.includes("ElevenLabs") && (i.textContent = n.replace(/ElevenLabs/g, "Upriser.ai")),
-                          (t = !0);
-                  }
-              }),
-              t
-          );
-      } catch {
-          return !1;
+        else
+          document.head.querySelector("#upriser-chat-styles") ||
+            (document.head.appendChild(i), (t = !0));
       }
-  }
-  attemptRelabelEverywhere() {
+      ((e.querySelectorAll ? e.querySelectorAll("img") : []).forEach((e) => {
+        const i = e.src || e.getAttribute("src") || "";
+        "true" !== e.getAttribute("data-upriser-protected") &&
+          "true" !== e.getAttribute("data-upriser-conversation-logo") &&
+          i.includes("data:image") &&
+          !i.includes("https://hotelvee.upriser.ai/upriser-logo.svg") &&
+          ((e.src = "https://hotelvee.upriser.ai/upriser-logo.svg"),
+          e.setAttribute("alt", "Upriser AI Assistant"),
+          e.setAttribute("data-upriser-replaced", "true"),
+          (t = !0));
+      }),
+        (e.querySelectorAll ? e.querySelectorAll("*") : []).forEach((e) => {
+          const i =
+            getComputedStyle(e).backgroundImage ||
+            e.style.backgroundImage ||
+            "";
+          i.includes("data:image") &&
+            !i.includes("https://hotelvee.upriser.ai/upriser-logo.svg") &&
+            ((e.style.backgroundImage =
+              "url(https://hotelvee.upriser.ai/upriser-logo.svg)"),
+            (e.style.backgroundSize = "contain"),
+            (e.style.backgroundPosition = "center"),
+            (e.style.backgroundRepeat = "no-repeat"),
+            e.setAttribute("data-upriser-bg-replaced", "true"),
+            (t = !0));
+        }));
+      let i = !1;
       try {
-          let e = this.relabelAndRewriteLinks(document.body);
-          const t = document.querySelector("upriser-convai"),
-              i = document.querySelector("elevenlabs-convai"),
-              n = t || i;
-          n && n.shadowRoot && ((e = this.relabelAndRewriteLinks(n.shadowRoot) || e), n._upriserObserverSetup || (this.setupShadowRootObserver(n.shadowRoot), (n._upriserObserverSetup = !0)));
-          try {
-              document.querySelectorAll("*").forEach((t) => {
-                  const i = t.shadowRoot;
-                  i && (e = this.relabelAndRewriteLinks(i) || e);
-              });
-          } catch {}
-          return e;
-      } catch (e) {
-          return this.log("Error in attemptRelabelEverywhere:", e), !1;
-      }
-  }
-  setupShadowRootObserver(e) {
-      new MutationObserver((t) => {
-          let i = !1;
-          t.forEach((e) => {
-              "childList" === e.type
-                  ? e.addedNodes.forEach((e) => {
-                        if (e.nodeType === Node.ELEMENT_NODE) {
-                            const t = e;
-                            ("IMG" === t.tagName || (t.querySelector && t.querySelector("img"))) && (i = !0);
-                        }
-                    })
-                  : "attributes" === e.type && e.target instanceof HTMLImageElement && "src" === e.attributeName && e.target.src.includes("data:image") && (i = !0);
-          }),
-              i &&
-                  setTimeout(() => {
-                      this.relabelAndRewriteLinks(e);
-                  }, 50);
-      }).observe(e, { childList: !0, subtree: !0, attributes: !0, attributeFilter: ["src"] });
-  }
-  startRelabelFlow() {
-      this.setupMutationObserver(), this.attemptRelabelEverywhere();
-      const e = setInterval(() => {
-          const t = document.querySelector("upriser-convai"),
-              i = document.querySelector("elevenlabs-convai"),
-              n = t || i;
-          n &&
-              (n.shadowRoot || (t && t.querySelector("elevenlabs-convai"))) &&
-              (this.log("Widget loaded, attempting relabeling..."),
-              this.attemptRelabelEverywhere() && (this.log("Relabeling successful, stopping retry interval"), clearInterval(e), this.intervals.delete("relabel-retry"), (this.isRelabelingComplete = !0)));
-      }, 1e3);
-      this.intervals.set("relabel-retry", e);
-      const t = setTimeout(() => {
-          const e = this.intervals.get("relabel-retry");
-          e && (clearInterval(e), this.intervals.delete("relabel-retry")), this.log("Stopped retrying relabeling after 30 seconds");
-      }, 3e4);
-      this.timeouts.set("relabel-timeout", t);
-  }
-  setupMutationObserver() {
-      this.mutationObserver && this.mutationObserver.disconnect();
-      let e = null;
-      (this.mutationObserver = new MutationObserver((t) => {
-          let i = !1;
-          t.forEach((e) => {
-              "childList" === e.type
-                  ? e.addedNodes.forEach((e) => {
-                        if (e.nodeType === Node.ELEMENT_NODE) {
-                            const t = e;
-                            ("IMG" === t.tagName || (t.querySelector && t.querySelector("img"))) && (i = !0);
-                        }
-                    })
-                  : "attributes" === e.type && e.target instanceof HTMLImageElement && "src" === e.attributeName && e.target.src.includes("data:image") && (i = !0);
-          }),
-              e && clearTimeout(e),
-              (e = setTimeout(() => {
-                  this.attemptRelabelEverywhere();
-              }, 100));
-      })),
-          this.mutationObserver.observe(document.documentElement, { childList: !0, subtree: !0, attributes: !0, attributeFilter: ["src", "style", "class"] });
-  }
-  startAutoAcceptFlow() {
-      let e = !1,
-          t = !1;
-      const i = (t) => {
-              if (!t || e) return !1;
-              const n = t.querySelectorAll ? t.querySelectorAll('button, [role="button"], span, div') : [];
-              for (let t = 0; t < n.length; t++) {
-                  const r = n[t];
-                  if ("Accept" === (r.textContent || "").trim()) {
-                      try {
-                          r.dispatchEvent(new MouseEvent("click", { bubbles: !0 }));
-                      } catch {
-                          r.click && r.click();
-                      }
-                      return (e = !0), !0;
-                  }
-                  const o = r.shadowRoot;
-                  if (o && i(o)) return !0;
-              }
-              return !1;
-          },
-          n = (e = !1) => {
-              try {
-                  this.wireStartCallHide(document.body), this.removeNeedHelpElement(document.body);
-                  const t = document.querySelector("elevenlabs-convai");
-                  t && t.shadowRoot && (this.wireStartCallHide(t.shadowRoot), this.removeNeedHelpElement(t.shadowRoot)), e && this.showWidgetAfterDelay(500);
-              } catch {}
-          },
-          r = () => {
-              try {
-                  const e = document.querySelector("upriser-convai"),
-                      i = document.querySelector("elevenlabs-convai");
-                  (!e && !i) || t
-                      ? n(!1)
-                      : (this.hideWidgetInitially(),
-                        (t = !0),
-                        setTimeout(() => {
-                            n(!0);
-                        }, 100));
-              } catch {}
-              let e = i(document.body);
-              const r = document.querySelector("upriser-convai"),
-                  o = document.querySelector("elevenlabs-convai"),
-                  s = r || o;
-              if (s && s.shadowRoot) e = i(s.shadowRoot) || e;
-              else if (r && r.querySelector("elevenlabs-convai")) {
-                  const t = r.querySelector("elevenlabs-convai");
-                  t.shadowRoot && (e = i(t.shadowRoot) || e);
-              }
-              return e;
-          };
-      let o = 0;
-      const s = setInterval(() => {
-          (r() || ++o >= 120) && (clearInterval(s), this.intervals.delete("auto-accept"));
-      }, 500);
-      this.intervals.set("auto-accept", s),
-          new MutationObserver((e) => {
-              const i = document.querySelector("upriser-convai"),
-                  o = document.querySelector("elevenlabs-convai");
-              let s = !1,
-                  l = !1;
-              if ((i || o) && !t)
-                  return (
-                      this.hideWidgetInitially(),
-                      (t = !0),
-                      void setTimeout(() => {
-                          n(!0);
-                      }, 100)
-                  );
-              e.forEach((e) => {
-                  "childList" === e.type &&
-                      (e.addedNodes.forEach((e) => {
-                          if (e.nodeType === Node.ELEMENT_NODE) {
-                              const t = e;
-                              ((t.textContent && t.textContent.includes("Need help?")) || (t.querySelector && t.querySelector('[text*="Need help?"]'))) && (s = !0);
-                              const i = t.textContent ? t.textContent.toLowerCase() : "";
-                              (i.includes("start a call") || i.includes("send message")) && (l = !0);
-                          }
-                      }),
-                      e.removedNodes.forEach((e) => {
-                          if (e.nodeType === Node.ELEMENT_NODE) {
-                              const t = e,
-                                  i = t.textContent ? t.textContent.toLowerCase() : "";
-                              (i.includes("calling") || i.includes("connected") || i.includes("recording")) && (l = !0);
-                          }
-                      }));
-              }),
-                  l &&
-                      setTimeout(() => {
-                          try {
-                              this.resetWidgetToInitialState();
-                          } catch {}
-                      }, 100),
-                  n(!1),
-                  r();
-          }).observe(document.documentElement, { childList: !0, subtree: !0 });
-      const l = new MutationObserver(() => {
-              n(!1);
-          }),
-          a = () => {
-              const e = document.querySelector("upriser-convai"),
-                  t = document.querySelector("elevenlabs-convai"),
-                  i = e || t;
-              if (i && i.shadowRoot)
-                  try {
-                      l.observe(i.shadowRoot, { childList: !0, subtree: !0, attributes: !0, attributeOldValue: !0 });
-                  } catch {}
-              else if (e && e.querySelector("elevenlabs-convai")) {
-                  const t = e.querySelector("elevenlabs-convai");
-                  if (t.shadowRoot)
-                      try {
-                          l.observe(t.shadowRoot, { childList: !0, subtree: !0, attributes: !0, attributeOldValue: !0 });
-                      } catch {}
-              }
-          },
-          c = setInterval(a, 1e3);
-      this.intervals.set("shadow-check", c),
-          a(),
-          document.addEventListener(
-              "click",
-              (e) => {
-                  const t = e.target;
-                  t && ("INPUT" === t.tagName || "TEXTAREA" === t.tagName || "true" === t.contentEditable || t.closest("input, textarea, [contenteditable]") || "textbox" === t.getAttribute("role")) && this.cancelHideTimeout();
-              },
-              { capture: !0 }
-          );
-  }
-  hideWidgetInitially() {
-      const e = document.querySelector("upriser-convai"),
-          t = document.querySelector("elevenlabs-convai"),
-          i = e || t;
-      i && (i.style.setProperty("visibility", "hidden", "important"), i.style.setProperty("opacity", "0", "important"));
-  }
-  showWidgetAfterDelay(e = 500) {
-      const t = setTimeout(() => {
-          const e = document.querySelector("upriser-convai"),
-              t = document.querySelector("elevenlabs-convai"),
-              i = e || t;
-          if (i)
-              try {
-                  i.style.removeProperty("visibility"), i.style.removeProperty("opacity");
-              } catch {}
-      }, e);
-      this.timeouts.set("show-widget", t);
-  }
-  hideWidgetTemporarily(e = 500) {
-      const t = document.querySelector("upriser-convai"),
-          i = document.querySelector("elevenlabs-convai"),
-          n = t || i;
-      if (!n) return;
-      const r = this.timeouts.get("hide-widget");
-      r && clearTimeout(r), n.style.setProperty("visibility", "hidden", "important"), n.style.setProperty("opacity", "0", "important");
-      const o = setTimeout(() => {
-          try {
-              n.style.removeProperty("visibility"), n.style.removeProperty("opacity"), this.timeouts.delete("hide-widget");
-          } catch {}
-      }, e);
-      this.timeouts.set("hide-widget", o);
-  }
-  cancelHideTimeout() {
-      const e = this.timeouts.get("hide-widget");
-      if (e) {
-          clearTimeout(e), this.timeouts.delete("hide-widget");
-          const t = document.querySelector("upriser-convai"),
-              i = document.querySelector("elevenlabs-convai"),
-              n = t || i;
-          if (n)
-              try {
-                  n.style.removeProperty("visibility"), n.style.removeProperty("opacity");
-              } catch {}
-      }
-  }
-  removeNeedHelpElement(e) {
-      try {
-          if (!e) return !1;
-          let t = !1;
-          return (
-              (e.querySelectorAll ? e.querySelectorAll("div") : []).forEach((e) => {
-                  if ("Need help?" === (e.textContent || "").trim()) {
-                      let i = e,
-                          n = e.parentElement;
-                      for (; n; ) {
-                          const e = n.className || "";
-                          if (
-                              e.includes("relative") &&
-                              e.includes("inline-flex") &&
-                              e.includes("shrink-0") &&
-                              e.includes("justify-center") &&
-                              e.includes("items-center") &&
-                              e.includes("transition-") &&
-                              e.includes("min-w-0") &&
-                              e.includes("z-1")
-                          ) {
-                              i = n;
-                              break;
-                          }
-                          n = n.parentElement;
-                      }
-                      try {
-                          i.remove(), (t = !0);
-                      } catch (e) {
-                          i.style.setProperty("display", "none", "important"), (t = !0);
-                      }
-                  }
-              }),
-              t
-          );
+        i = "true" === sessionStorage.getItem("upriser-conversation-started");
       } catch {
-          return !1;
+        i = !0 === window.upriserConversationStarted;
       }
-  }
-  wireStartCallHide(e) {
-      (e.querySelectorAll ? e.querySelectorAll('button, [role="button"]') : []).forEach((e) => {
-          if (e.dataset && "1" === e.dataset.upriserWired) return;
-          const t = (e.textContent || "").trim();
-          ("Start a call" !== t && "Send message" !== t && !t.includes("Call")) ||
-              e.closest("input, textarea, [contenteditable]") ||
-              e.querySelector("input, textarea, [contenteditable]") ||
-              (e.dataset && (e.dataset.upriserWired = "1"),
-              e.addEventListener(
+      (e.querySelectorAll
+        ? e.querySelectorAll(
+            '.relative.shrink-0.w-48.h-48, [class*="relative"][class*="w-48"][class*="h-48"]',
+          )
+        : []
+      ).forEach((e) => {
+        (e
+          .querySelectorAll(
+            '.absolute.inset-0.rounded-full.overflow-hidden.bg-base.bg-cover, [class*="absolute"][class*="inset-0"][class*="rounded-full"][class*="bg-cover"]',
+          )
+          .forEach((e) => {
+            e.style.display = "none";
+          }),
+          e
+            .querySelectorAll('.el-wave-overlay, canvas, [class*="wave"]')
+            .forEach((e) => {
+              e.style.display = "none";
+            }));
+        const i = e.querySelector(
+            ".absolute.inset-0.rounded-full.bg-base-border",
+          ),
+          n = e.getAttribute("data-upriser-hidden-conversation"),
+          r = "none" !== e.style.display;
+        if (i && !n && r && !e.getAttribute("data-upriser-logo-added")) {
+          const i = document.createElement("img");
+          ((i.src = "https://hotelvee.upriser.ai/upriser-logo.svg"),
+            (i.alt = "Upriser AI Assistant"),
+            (i.style.cssText =
+              "\n                      position: absolute;\n                      inset: 0;\n                      width: 100%;\n                      height: 100%;\n                      object-fit: contain;\n                      padding: 20%;\n                      z-index: 100;\n                  "),
+            i.setAttribute("data-upriser-logo", "true"),
+            i.setAttribute("data-upriser-protected", "true"),
+            e.appendChild(i),
+            e.setAttribute("data-upriser-logo-added", "true"),
+            (t = !0));
+        }
+      });
+      const n = e.querySelectorAll
+          ? e.querySelectorAll('[class*="justify-end"]')
+          : [],
+        r = e.querySelectorAll
+          ? e.querySelectorAll('[class*="bg-accent"]')
+          : [],
+        o = e.querySelectorAll ? e.querySelectorAll('[class*="pl-16"]') : [],
+        s = e.querySelectorAll
+          ? e.querySelectorAll('[class*="text-accent-primary"]')
+          : [];
+      return (
+        (n.length > 0 || r.length > 0 || o.length > 0 || s.length > 0) &&
+          ((e.querySelectorAll
+            ? e.querySelectorAll(".bg-base.shrink-0.flex.gap-2.p-4")
+            : []
+          ).forEach((i) => {
+            const n = i.querySelector(".animate-text");
+            if (
+              n &&
+              n.textContent &&
+              n.textContent.includes("Chatting with AI Agent") &&
+              !i.getAttribute("data-upriser-hidden")
+            ) {
+              ((i.style.transition = "opacity 0.3s ease-out"),
+                (i.style.opacity = "0"),
+                setTimeout(() => {
+                  i.style.display = "none";
+                }, 300),
+                i.setAttribute("data-upriser-hidden", "true"),
+                (t = !0),
+                (e.querySelectorAll
+                  ? e.querySelectorAll(
+                      '.relative.shrink-0.w-48.h-48, [class*="relative"][class*="w-48"][class*="h-48"]',
+                    )
+                  : []
+                ).forEach((e) => {
+                  ((e.style.display = "none"),
+                    e.setAttribute("data-upriser-hidden-conversation", "true"));
+                }));
+              try {
+                sessionStorage.setItem("upriser-conversation-started", "true");
+              } catch {
+                window.upriserConversationStarted = !0;
+              }
+            }
+          }),
+          (e.querySelectorAll
+            ? e.querySelectorAll(
+                '.px-4.pb-3.grow.flex.flex-col.gap-3, [class*="px-4"][class*="pb-3"][class*="grow"][class*="flex-col"]',
+              )
+            : []
+          ).forEach((e) => {
+            e.getAttribute("data-upriser-padded") ||
+              ((e.style.paddingTop = "15px"),
+              e.setAttribute("data-upriser-padded", "true"),
+              (t = !0));
+          })),
+        (e.querySelectorAll
+          ? e.querySelectorAll(
+              '.bg-base.shrink-0, .bg-base.items-start, [class*="bg-base"][class*="items-start"]',
+            )
+          : []
+        ).forEach((e) => {
+          e.classList.contains("items-start") &&
+            !e.getAttribute("data-upriser-centered") &&
+            (e.style.setProperty("align-items", "center", "important"),
+            e.setAttribute("data-upriser-centered", "true"),
+            (t = !0));
+        }),
+        (e.querySelectorAll
+          ? e.querySelectorAll("span.opacity-30, .opacity-30")
+          : []
+        ).forEach((e) => {
+          if (
+            "Powered by ElevenLabs" ===
+            (e.textContent ? e.textContent.trim() : "")
+          ) {
+            if ("true" === e.getAttribute("data-upriser-branded")) return;
+            ((e.textContent = "Powered by Upriser.ai"),
+              (e.style.fontFamily = "Plus Jakarta Sans, sans-serif"),
+              e.classList.remove("opacity-30", "opacity-50", "opacity-70"),
+              e.classList.add("upriser-white"),
+              e.setAttribute("data-upriser-branded", "true"),
+              e.style.setProperty("color", this.config.fontColor, "important"),
+              e.style.setProperty("opacity", "1", "important"),
+              (t = !0));
+          }
+        }),
+        (e.querySelectorAll ? e.querySelectorAll("a[href]") : []).forEach(
+          (e) => {
+            const i = e.getAttribute("href") || "",
+              n = (e.textContent || "").trim();
+            if (
+              (e.getAttribute("data-upriser-color-applied") ||
+                (e.style.setProperty(
+                  "color",
+                  this.config.linkColor,
+                  "important",
+                ),
+                e.style.setProperty("opacity", "1", "important"),
+                e.classList.remove("opacity-30", "opacity-50", "opacity-70"),
+                e.setAttribute("data-upriser-color-applied", "true"),
+                (t = !0)),
+              i.includes("elevenlabs") ||
+                "Conversational AI" === n ||
+                n.includes("ElevenLabs"))
+            ) {
+              if ("true" === e.getAttribute("data-upriser-processed")) return;
+              ((e.style.fontFamily = "Plus Jakarta Sans, sans-serif"),
+                e.setAttribute("href", "https://www.upriser.ai"),
+                e.setAttribute("target", "_blank"),
+                e.setAttribute("rel", "noopener noreferrer"),
+                e.setAttribute("data-upriser-processed", "true"));
+              const i = e.cloneNode(!0);
+              (e.parentNode.replaceChild(i, e),
+                i.addEventListener(
                   "click",
                   (e) => {
-                      const t = e.target;
-                      (t && ("INPUT" === t.tagName || "TEXTAREA" === t.tagName || "true" === t.contentEditable || t.closest("input, textarea, [contenteditable]"))) || this.hideWidgetTemporarily(500);
+                    try {
+                      e.preventDefault();
+                    } catch {}
+                    try {
+                      window.open(
+                        "https://www.upriser.ai",
+                        "_blank",
+                        "noopener,noreferrer",
+                      );
+                    } catch {
+                      window.location.href = "https://www.upriser.ai";
+                    }
                   },
-                  { capture: !0 }
-              ));
-          const i = e.shadowRoot;
-          i && this.wireStartCallHide(i);
-      });
+                  { once: !0 },
+                ),
+                n.includes("ElevenLabs") &&
+                  (i.textContent = n.replace(/ElevenLabs/g, "Upriser.ai")),
+                (t = !0));
+            }
+          },
+        ),
+        t
+      );
+    } catch {
+      return !1;
+    }
+  }
+  attemptRelabelEverywhere() {
+    try {
+      let e = this.relabelAndRewriteLinks(document.body);
+      const t = document.querySelector("upriser-convai"),
+        i = document.querySelector("elevenlabs-convai"),
+        n = t || i;
+      n &&
+        n.shadowRoot &&
+        ((e = this.relabelAndRewriteLinks(n.shadowRoot) || e),
+        n._upriserObserverSetup ||
+          (this.setupShadowRootObserver(n.shadowRoot),
+          (n._upriserObserverSetup = !0)));
+      try {
+        document.querySelectorAll("*").forEach((t) => {
+          const i = t.shadowRoot;
+          i && (e = this.relabelAndRewriteLinks(i) || e);
+        });
+      } catch {}
+      return e;
+    } catch (e) {
+      return (this.log("Error in attemptRelabelEverywhere:", e), !1);
+    }
+  }
+  setupShadowRootObserver(e) {
+    new MutationObserver((t) => {
+      let i = !1;
+      (t.forEach((e) => {
+        "childList" === e.type
+          ? e.addedNodes.forEach((e) => {
+              if (e.nodeType === Node.ELEMENT_NODE) {
+                const t = e;
+                ("IMG" === t.tagName ||
+                  (t.querySelector && t.querySelector("img"))) &&
+                  (i = !0);
+              }
+            })
+          : "attributes" === e.type &&
+            e.target instanceof HTMLImageElement &&
+            "src" === e.attributeName &&
+            e.target.src.includes("data:image") &&
+            (i = !0);
+      }),
+        i &&
+          setTimeout(() => {
+            this.relabelAndRewriteLinks(e);
+          }, 50));
+    }).observe(e, {
+      childList: !0,
+      subtree: !0,
+      attributes: !0,
+      attributeFilter: ["src"],
+    });
+  }
+  startRelabelFlow() {
+    (this.setupMutationObserver(), this.attemptRelabelEverywhere());
+    const e = setInterval(() => {
+      const t = document.querySelector("upriser-convai"),
+        i = document.querySelector("elevenlabs-convai"),
+        n = t || i;
+      n &&
+        (n.shadowRoot || (t && t.querySelector("elevenlabs-convai"))) &&
+        (this.log("Widget loaded, attempting relabeling..."),
+        this.attemptRelabelEverywhere() &&
+          (this.log("Relabeling successful, stopping retry interval"),
+          clearInterval(e),
+          this.intervals.delete("relabel-retry"),
+          (this.isRelabelingComplete = !0)));
+    }, 1e3);
+    this.intervals.set("relabel-retry", e);
+    const t = setTimeout(() => {
+      const e = this.intervals.get("relabel-retry");
+      (e && (clearInterval(e), this.intervals.delete("relabel-retry")),
+        this.log("Stopped retrying relabeling after 30 seconds"));
+    }, 3e4);
+    this.timeouts.set("relabel-timeout", t);
+  }
+  setupMutationObserver() {
+    this.mutationObserver && this.mutationObserver.disconnect();
+    let e = null;
+    ((this.mutationObserver = new MutationObserver((t) => {
+      let i = !1;
+      (t.forEach((e) => {
+        "childList" === e.type
+          ? e.addedNodes.forEach((e) => {
+              if (e.nodeType === Node.ELEMENT_NODE) {
+                const t = e;
+                ("IMG" === t.tagName ||
+                  (t.querySelector && t.querySelector("img"))) &&
+                  (i = !0);
+              }
+            })
+          : "attributes" === e.type &&
+            e.target instanceof HTMLImageElement &&
+            "src" === e.attributeName &&
+            e.target.src.includes("data:image") &&
+            (i = !0);
+      }),
+        e && clearTimeout(e),
+        (e = setTimeout(() => {
+          this.attemptRelabelEverywhere();
+        }, 100)));
+    })),
+      this.mutationObserver.observe(document.documentElement, {
+        childList: !0,
+        subtree: !0,
+        attributes: !0,
+        attributeFilter: ["src", "style", "class"],
+      }));
+  }
+  startAutoAcceptFlow() {
+    let e = !1,
+      t = !1;
+    const i = (t) => {
+        if (!t || e) return !1;
+        const n = t.querySelectorAll
+          ? t.querySelectorAll('button, [role="button"], span, div')
+          : [];
+        for (let t = 0; t < n.length; t++) {
+          const r = n[t];
+          if ("Accept" === (r.textContent || "").trim()) {
+            try {
+              r.dispatchEvent(new MouseEvent("click", { bubbles: !0 }));
+            } catch {
+              r.click && r.click();
+            }
+            return ((e = !0), !0);
+          }
+          const o = r.shadowRoot;
+          if (o && i(o)) return !0;
+        }
+        return !1;
+      },
+      n = (e = !1) => {
+        try {
+          (this.wireStartCallHide(document.body),
+            this.removeNeedHelpElement(document.body));
+          const t = document.querySelector("elevenlabs-convai");
+          (t &&
+            t.shadowRoot &&
+            (this.wireStartCallHide(t.shadowRoot),
+            this.removeNeedHelpElement(t.shadowRoot)),
+            e && this.showWidgetAfterDelay(500));
+        } catch {}
+      },
+      r = () => {
+        try {
+          const e = document.querySelector("upriser-convai"),
+            i = document.querySelector("elevenlabs-convai");
+          (!e && !i) || t
+            ? n(!1)
+            : (this.hideWidgetInitially(),
+              (t = !0),
+              setTimeout(() => {
+                n(!0);
+              }, 100));
+        } catch {}
+        let e = i(document.body);
+        const r = document.querySelector("upriser-convai"),
+          o = document.querySelector("elevenlabs-convai"),
+          s = r || o;
+        if (s && s.shadowRoot) e = i(s.shadowRoot) || e;
+        else if (r && r.querySelector("elevenlabs-convai")) {
+          const t = r.querySelector("elevenlabs-convai");
+          t.shadowRoot && (e = i(t.shadowRoot) || e);
+        }
+        return e;
+      };
+    let o = 0;
+    const s = setInterval(() => {
+      (r() || ++o >= 120) &&
+        (clearInterval(s), this.intervals.delete("auto-accept"));
+    }, 500);
+    (this.intervals.set("auto-accept", s),
+      new MutationObserver((e) => {
+        const i = document.querySelector("upriser-convai"),
+          o = document.querySelector("elevenlabs-convai");
+        let s = !1,
+          l = !1;
+        if ((i || o) && !t)
+          return (
+            this.hideWidgetInitially(),
+            (t = !0),
+            void setTimeout(() => {
+              n(!0);
+            }, 100)
+          );
+        (e.forEach((e) => {
+          "childList" === e.type &&
+            (e.addedNodes.forEach((e) => {
+              if (e.nodeType === Node.ELEMENT_NODE) {
+                const t = e;
+                ((t.textContent && t.textContent.includes("Need help?")) ||
+                  (t.querySelector &&
+                    t.querySelector('[text*="Need help?"]'))) &&
+                  (s = !0);
+                const i = t.textContent ? t.textContent.toLowerCase() : "";
+                (i.includes("start a call") || i.includes("send message")) &&
+                  (l = !0);
+              }
+            }),
+            e.removedNodes.forEach((e) => {
+              if (e.nodeType === Node.ELEMENT_NODE) {
+                const t = e,
+                  i = t.textContent ? t.textContent.toLowerCase() : "";
+                (i.includes("calling") ||
+                  i.includes("connected") ||
+                  i.includes("recording")) &&
+                  (l = !0);
+              }
+            }));
+        }),
+          l &&
+            setTimeout(() => {
+              try {
+                this.resetWidgetToInitialState();
+              } catch {}
+            }, 100),
+          n(!1),
+          r());
+      }).observe(document.documentElement, { childList: !0, subtree: !0 }));
+    const l = new MutationObserver(() => {
+        n(!1);
+      }),
+      a = () => {
+        const e = document.querySelector("upriser-convai"),
+          t = document.querySelector("elevenlabs-convai"),
+          i = e || t;
+        if (i && i.shadowRoot)
+          try {
+            l.observe(i.shadowRoot, {
+              childList: !0,
+              subtree: !0,
+              attributes: !0,
+              attributeOldValue: !0,
+            });
+          } catch {}
+        else if (e && e.querySelector("elevenlabs-convai")) {
+          const t = e.querySelector("elevenlabs-convai");
+          if (t.shadowRoot)
+            try {
+              l.observe(t.shadowRoot, {
+                childList: !0,
+                subtree: !0,
+                attributes: !0,
+                attributeOldValue: !0,
+              });
+            } catch {}
+        }
+      },
+      c = setInterval(a, 1e3);
+    (this.intervals.set("shadow-check", c),
+      a(),
+      document.addEventListener(
+        "click",
+        (e) => {
+          const t = e.target;
+          t &&
+            ("INPUT" === t.tagName ||
+              "TEXTAREA" === t.tagName ||
+              "true" === t.contentEditable ||
+              t.closest("input, textarea, [contenteditable]") ||
+              "textbox" === t.getAttribute("role")) &&
+            this.cancelHideTimeout();
+        },
+        { capture: !0 },
+      ));
+  }
+  hideWidgetInitially() {
+    const e = document.querySelector("upriser-convai"),
+      t = document.querySelector("elevenlabs-convai"),
+      i = e || t;
+    i &&
+      (i.style.setProperty("visibility", "hidden", "important"),
+      i.style.setProperty("opacity", "0", "important"));
+  }
+  showWidgetAfterDelay(e = 500) {
+    const t = setTimeout(() => {
+      const e = document.querySelector("upriser-convai"),
+        t = document.querySelector("elevenlabs-convai"),
+        i = e || t;
+      if (i)
+        try {
+          (i.style.removeProperty("visibility"),
+            i.style.removeProperty("opacity"));
+        } catch {}
+    }, e);
+    this.timeouts.set("show-widget", t);
+  }
+  hideWidgetTemporarily(e = 500) {
+    const t = document.querySelector("upriser-convai"),
+      i = document.querySelector("elevenlabs-convai"),
+      n = t || i;
+    if (!n) return;
+    const r = this.timeouts.get("hide-widget");
+    (r && clearTimeout(r),
+      n.style.setProperty("visibility", "hidden", "important"),
+      n.style.setProperty("opacity", "0", "important"));
+    const o = setTimeout(() => {
+      try {
+        (n.style.removeProperty("visibility"),
+          n.style.removeProperty("opacity"),
+          this.timeouts.delete("hide-widget"));
+      } catch {}
+    }, e);
+    this.timeouts.set("hide-widget", o);
+  }
+  cancelHideTimeout() {
+    const e = this.timeouts.get("hide-widget");
+    if (e) {
+      (clearTimeout(e), this.timeouts.delete("hide-widget"));
+      const t = document.querySelector("upriser-convai"),
+        i = document.querySelector("elevenlabs-convai"),
+        n = t || i;
+      if (n)
+        try {
+          (n.style.removeProperty("visibility"),
+            n.style.removeProperty("opacity"));
+        } catch {}
+    }
+  }
+  removeNeedHelpElement(e) {
+    try {
+      if (!e) return !1;
+      let t = !1;
+      return (
+        (e.querySelectorAll ? e.querySelectorAll("div") : []).forEach((e) => {
+          if ("Need help?" === (e.textContent || "").trim()) {
+            let i = e,
+              n = e.parentElement;
+            for (; n; ) {
+              const e = n.className || "";
+              if (
+                e.includes("relative") &&
+                e.includes("inline-flex") &&
+                e.includes("shrink-0") &&
+                e.includes("justify-center") &&
+                e.includes("items-center") &&
+                e.includes("transition-") &&
+                e.includes("min-w-0") &&
+                e.includes("z-1")
+              ) {
+                i = n;
+                break;
+              }
+              n = n.parentElement;
+            }
+            try {
+              (i.remove(), (t = !0));
+            } catch (e) {
+              (i.style.setProperty("display", "none", "important"), (t = !0));
+            }
+          }
+        }),
+        t
+      );
+    } catch {
+      return !1;
+    }
+  }
+  wireStartCallHide(e) {
+    (e.querySelectorAll
+      ? e.querySelectorAll('button, [role="button"]')
+      : []
+    ).forEach((e) => {
+      if (e.dataset && "1" === e.dataset.upriserWired) return;
+      const t = (e.textContent || "").trim();
+      ("Start a call" !== t && "Send message" !== t && !t.includes("Call")) ||
+        e.closest("input, textarea, [contenteditable]") ||
+        e.querySelector("input, textarea, [contenteditable]") ||
+        (e.dataset && (e.dataset.upriserWired = "1"),
+        e.addEventListener(
+          "click",
+          (e) => {
+            const t = e.target;
+            (t &&
+              ("INPUT" === t.tagName ||
+                "TEXTAREA" === t.tagName ||
+                "true" === t.contentEditable ||
+                t.closest("input, textarea, [contenteditable]"))) ||
+              this.hideWidgetTemporarily(500);
+          },
+          { capture: !0 },
+        ));
+      const i = e.shadowRoot;
+      i && this.wireStartCallHide(i);
+    });
   }
   resetWidgetToInitialState() {
-      try {
-          const e = document.querySelector("upriser-convai"),
-              t = document.querySelector("elevenlabs-convai"),
-              i = e || t;
-          if (!i) return;
-          if ((this.clearWidgetWiring(document.body), i.shadowRoot)) this.clearWidgetWiring(i.shadowRoot);
-          else if (e && e.querySelector("elevenlabs-convai")) {
-              const t = e.querySelector("elevenlabs-convai");
-              t.shadowRoot && this.clearWidgetWiring(t.shadowRoot);
-          }
-          if (i.shadowRoot) {
-              const e = i.shadowRoot;
-              e.querySelectorAll('button, [role="button"]').forEach((e) => {
-                  const t = (e.textContent || "").trim().toLowerCase();
-                  if (t.includes("end") || t.includes("close") || t.includes("hang up") || "×" === t)
-                      try {
-                          e.click();
-                      } catch {}
-              }),
-                  setTimeout(() => {
-                      try {
-                          this.removeNeedHelpElement(e), this.wireStartCallHide(e), this.removeNeedHelpElement(document.body), this.wireStartCallHide(document.body);
-                      } catch {}
-                  }, 500);
-          }
-      } catch (e) {
-          this.log("Error resetting widget state:", e);
+    try {
+      const e = document.querySelector("upriser-convai"),
+        t = document.querySelector("elevenlabs-convai"),
+        i = e || t;
+      if (!i) return;
+      if ((this.clearWidgetWiring(document.body), i.shadowRoot))
+        this.clearWidgetWiring(i.shadowRoot);
+      else if (e && e.querySelector("elevenlabs-convai")) {
+        const t = e.querySelector("elevenlabs-convai");
+        t.shadowRoot && this.clearWidgetWiring(t.shadowRoot);
       }
+      if (i.shadowRoot) {
+        const e = i.shadowRoot;
+        (e.querySelectorAll('button, [role="button"]').forEach((e) => {
+          const t = (e.textContent || "").trim().toLowerCase();
+          if (
+            t.includes("end") ||
+            t.includes("close") ||
+            t.includes("hang up") ||
+            "×" === t
+          )
+            try {
+              e.click();
+            } catch {}
+        }),
+          setTimeout(() => {
+            try {
+              (this.removeNeedHelpElement(e),
+                this.wireStartCallHide(e),
+                this.removeNeedHelpElement(document.body),
+                this.wireStartCallHide(document.body));
+            } catch {}
+          }, 500));
+      }
+    } catch (e) {
+      this.log("Error resetting widget state:", e);
+    }
   }
   clearWidgetWiring(e) {
-      try {
-          (e.querySelectorAll ? e.querySelectorAll('button, [role="button"]') : []).forEach((e) => {
-              e.dataset && delete e.dataset.upriserWired;
-          });
-      } catch {}
+    try {
+      (e.querySelectorAll
+        ? e.querySelectorAll('button, [role="button"]')
+        : []
+      ).forEach((e) => {
+        e.dataset && delete e.dataset.upriserWired;
+      });
+    } catch {}
   }
   updateConfig(e) {
-      (this.config = { ...this.config, ...e }), this.log("Configuration updated:", e);
+    ((this.config = { ...this.config, ...e }),
+      this.log("Configuration updated:", e));
   }
   destroy() {
-      this.timeouts.forEach((e) => {
-          clearTimeout(e);
+    (this.timeouts.forEach((e) => {
+      clearTimeout(e);
+    }),
+      this.timeouts.clear(),
+      this.intervals.forEach((e) => {
+        clearInterval(e);
       }),
-          this.timeouts.clear(),
-          this.intervals.forEach((e) => {
-              clearInterval(e);
-          }),
-          this.intervals.clear(),
-          this.mutationObserver && (this.mutationObserver.disconnect(), (this.mutationObserver = null)),
-          this.currentModal && this.closeModal();
-      const e = document.querySelector("upriser-convai"),
-          t = document.querySelector("elevenlabs-convai");
-      e && e.remove(), t && t.remove(), this.clearWidgetWiring(document.body);
-      const i = document.querySelector("#upriser-chat-styles");
-      i && i.remove(), (this.isInitialized = !1), (this.isRelabelingComplete = !1), this.eventHandlers.clear(), this.log("Widget destroyed and cleaned up");
+      this.intervals.clear(),
+      this.mutationObserver &&
+        (this.mutationObserver.disconnect(), (this.mutationObserver = null)),
+      this.currentModal && this.closeModal());
+    const e = document.querySelector("upriser-convai"),
+      t = document.querySelector("elevenlabs-convai");
+    (e && e.remove(), t && t.remove(), this.clearWidgetWiring(document.body));
+    const i = document.querySelector("#upriser-chat-styles");
+    (i && i.remove(),
+      (this.isInitialized = !1),
+      (this.isRelabelingComplete = !1),
+      this.eventHandlers.clear(),
+      this.log("Widget destroyed and cleaned up"));
   }
   test() {
-      this.log("Testing Upriser Widget functionality...");
-      const e = this.attemptRelabelEverywhere();
-      return this.log("Relabel test result:", e), this.log("Widget test completed"), { relabeling: e, isInitialized: this.isInitialized };
+    this.log("Testing Upriser Widget functionality...");
+    const e = this.attemptRelabelEverywhere();
+    return (
+      this.log("Relabel test result:", e),
+      this.log("Widget test completed"),
+      { relabeling: e, isInitialized: this.isInitialized }
+    );
   }
   createModal(e = {}) {
-      try {
-          if (this.currentModal) return this.log("Modal already exists, closing current modal first"), this.closeModal(), null;
-          this.modalCounter++;
-          const t = `upriser-modal-${this.modalCounter}`,
-              i = document.createElement("div");
-          (i.id = t), i.setAttribute("role", "dialog"), i.setAttribute("aria-modal", "true"), i.setAttribute("aria-labelledby", "modal-title");
-          const n = e.className || "",
-              r = e.url || "",
-              o = e.title || "Modal",
-              s = e.width || "95vw",
-              l = e.height || "90vh",
-              a = e.maxWidth || "1024px",
-              c = e.onClose || function () {};
-          i.style.cssText =
-              "\n            position: fixed;\n            top: 0;\n            left: 0;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            background-color: rgba(0, 0, 0, 0.5);\n            backdrop-filter: blur(4px);\n            transition: opacity 0.3s;\n            padding: 16px;\n        ";
-          const d = document.createElement("div");
-          d.style.cssText = `\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n            background-color: white;\n            border-radius: 16px;\n            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);\n            overflow: hidden;\n            transition: all 0.3s ease-out;\n            width: ${s};\n            height: ${l};\n            max-width: ${a};\n            max-height: calc(100vh - 2rem);\n            position: relative;\n            ${n}\n        `;
-          const u = document.createElement("button");
-          u.setAttribute("aria-label", "Close modal"),
-              (u.style.cssText =
-                  "\n            position: absolute;\n            top: 12px;\n            right: 12px;\n            background: transparent;\n            border: none;\n            font-size: 20px;\n            cursor: pointer;\n            z-index: 10;\n            color: #666;\n            width: 30px;\n            height: 30px;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        "),
-              (u.innerHTML = "×");
-          const h = document.createElement("div");
-          if (
-              ((h.style.cssText = "\n            width: 100%;\n            height: 100%;\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n        "),
-              r)
-          ) {
-              const e = document.createElement("iframe");
-              (e.src = r),
-                  (e.width = "100%"),
-                  (e.height = "100%"),
-                  (e.frameBorder = "0"),
-                  (e.allowFullScreen = !0),
-                  (e.title = o),
-                  (e.loading = "lazy"),
-                  (e.style.cssText = "\n                border-bottom-left-radius: 16px;\n                border-bottom-right-radius: 16px;\n                width: 100%;\n                height: 100%;\n            "),
-                  h.appendChild(e);
-          } else e.content && h.appendChild(e.content);
-          d.appendChild(u), d.appendChild(h), i.appendChild(d);
-          const p = (e) => {
-                e.target === i && (this.closeModal(), c());
-            },
-            m = (e) => {
-                "Escape" === e.key && (this.closeModal(), c());
-            };
-          i.addEventListener("click", p),
-              u.addEventListener("click", () => {
-                  this.closeModal(), c();
-              }),
-              document.addEventListener("keydown", m),
-              (document.body.style.overflow = "hidden"),
-              document.body.appendChild(i),
-              (this.currentModal = {
-                  element: i,
-                  id: t,
-                  cleanup: () => {
-                      i.removeEventListener("click", p), document.removeEventListener("keydown", m), (document.body.style.overflow = "unset");
-                  },
-              }),
-              this.log("Modal created with ID:", t);
-          const g = () => {
-              const e = document.createElement("iframe");
-              (e.src = r),
-                  (e.width = "100%"),
-                  (e.height = "100%"),
-                  (e.frameBorder = "0"),
-                  (e.allowFullScreen = !0),
-                  (e.title = o),
-                  (e.loading = "lazy"),
-                  (e.style.cssText = "\n                border-bottom-left-radius: 16px;\n                border-bottom-right-radius: 16px;\n                width: 100%;\n                height: 100%;\n            "),
-                  (h.innerHTML = ""),
-                  h.appendChild(e);
-          };
-          return {
-              id: t,
-              element: i,
-              close: () => {
-                  this.closeModal(), c();
-              },
-              updateUrl: (e) => {
-                  g();
-              },
-              setContent: (e) => {
-                  (h.innerHTML = ""), h.appendChild(e);
-              },
-          };
-      } catch (e) {
-          return console.error("Failed to create modal:", e), null;
-      }
+    try {
+      if (this.currentModal)
+        return (
+          this.log("Modal already exists, closing current modal first"),
+          this.closeModal(),
+          null
+        );
+      this.modalCounter++;
+      const t = `upriser-modal-${this.modalCounter}`,
+        i = document.createElement("div");
+      ((i.id = t),
+        i.setAttribute("role", "dialog"),
+        i.setAttribute("aria-modal", "true"),
+        i.setAttribute("aria-labelledby", "modal-title"));
+      const n = e.className || "",
+        r = e.url || "",
+        o = e.title || "Modal",
+        s = e.width || "95vw",
+        l = e.height || "90vh",
+        a = e.maxWidth || "1024px",
+        c = e.onClose || function () {};
+      i.style.cssText =
+        "\n            position: fixed;\n            top: 0;\n            left: 0;\n            right: 0;\n            bottom: 0;\n            z-index: 9999;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            background-color: rgba(0, 0, 0, 0.5);\n            backdrop-filter: blur(4px);\n            transition: opacity 0.3s;\n            padding: 16px;\n        ";
+      const d = document.createElement("div");
+      d.style.cssText = `\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n            background-color: white;\n            border-radius: 16px;\n            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);\n            overflow: hidden;\n            transition: all 0.3s ease-out;\n            width: ${s};\n            height: ${l};\n            max-width: ${a};\n            max-height: calc(100vh - 2rem);\n            position: relative;\n            ${n}\n        `;
+      const u = document.createElement("button");
+      (u.setAttribute("aria-label", "Close modal"),
+        (u.style.cssText =
+          "\n            position: absolute;\n            top: 12px;\n            right: 12px;\n            background: transparent;\n            border: none;\n            font-size: 20px;\n            cursor: pointer;\n            z-index: 10;\n            color: #666;\n            width: 30px;\n            height: 30px;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        "),
+        (u.innerHTML = "×"));
+      const h = document.createElement("div");
+      if (
+        ((h.style.cssText =
+          "\n            width: 100%;\n            height: 100%;\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: center;\n        "),
+        r)
+      ) {
+        const e = document.createElement("iframe");
+        ((e.src = r),
+          (e.width = "100%"),
+          (e.height = "100%"),
+          (e.frameBorder = "0"),
+          (e.allowFullScreen = !0),
+          (e.title = o),
+          (e.loading = "lazy"),
+          (e.style.cssText =
+            "\n                border-bottom-left-radius: 16px;\n                border-bottom-right-radius: 16px;\n                width: 100%;\n                height: 100%;\n            "),
+          h.appendChild(e));
+      } else e.content && h.appendChild(e.content);
+      (d.appendChild(u), d.appendChild(h), i.appendChild(d));
+      const p = (e) => {
+          e.target === i && (this.closeModal(), c());
+        },
+        m = (e) => {
+          "Escape" === e.key && (this.closeModal(), c());
+        };
+      (i.addEventListener("click", p),
+        u.addEventListener("click", () => {
+          (this.closeModal(), c());
+        }),
+        document.addEventListener("keydown", m),
+        (document.body.style.overflow = "hidden"),
+        document.body.appendChild(i),
+        (this.currentModal = {
+          element: i,
+          id: t,
+          cleanup: () => {
+            (i.removeEventListener("click", p),
+              document.removeEventListener("keydown", m),
+              (document.body.style.overflow = "unset"));
+          },
+        }),
+        this.log("Modal created with ID:", t));
+      const g = () => {
+        const e = document.createElement("iframe");
+        ((e.src = r),
+          (e.width = "100%"),
+          (e.height = "100%"),
+          (e.frameBorder = "0"),
+          (e.allowFullScreen = !0),
+          (e.title = o),
+          (e.loading = "lazy"),
+          (e.style.cssText =
+            "\n                border-bottom-left-radius: 16px;\n                border-bottom-right-radius: 16px;\n                width: 100%;\n                height: 100%;\n            "),
+          (h.innerHTML = ""),
+          h.appendChild(e));
+      };
+      return {
+        id: t,
+        element: i,
+        close: () => {
+          (this.closeModal(), c());
+        },
+        updateUrl: (e) => {
+          g();
+        },
+        setContent: (e) => {
+          ((h.innerHTML = ""), h.appendChild(e));
+        },
+      };
+    } catch (e) {
+      return (console.error("Failed to create modal:", e), null);
+    }
   }
   closeModal() {
-      if (!this.currentModal) return !1;
-      try {
-          return this.currentModal.cleanup && this.currentModal.cleanup(), this.currentModal.element && this.currentModal.element.remove(), this.log("Modal closed:", this.currentModal.id), (this.currentModal = null), !0;
-      } catch (e) {
-          return console.error("Failed to close modal:", e), !1;
-      }
+    if (!this.currentModal) return !1;
+    try {
+      return (
+        this.currentModal.cleanup && this.currentModal.cleanup(),
+        this.currentModal.element && this.currentModal.element.remove(),
+        this.log("Modal closed:", this.currentModal.id),
+        (this.currentModal = null),
+        !0
+      );
+    } catch (e) {
+      return (console.error("Failed to close modal:", e), !1);
+    }
   }
   openModal(e = {}) {
-      const t = e.url;
-      if (!t || "string" != typeof t) return console.warn("openModal requires a valid URL"), { success: !1, message: "Missing or invalid URL parameter" };
-      const i = e.title || "Modal";
-      return this.log("Opening modal:", { url: t, title: i }), this.createModal({ url: t, title: i, onClose: e.onClose || function () {} }), { success: !0, message: "Modal opened successfully" };
+    const t = e.url;
+    if (!t || "string" != typeof t)
+      return (
+        console.warn("openModal requires a valid URL"),
+        { success: !1, message: "Missing or invalid URL parameter" }
+      );
+    const i = e.title || "Modal";
+    return (
+      this.log("Opening modal:", { url: t, title: i }),
+      this.createModal({
+        url: t,
+        title: i,
+        onClose: e.onClose || function () {},
+      }),
+      { success: !0, message: "Modal opened successfully" }
+    );
   }
   getClientTools() {
-      return { ...{ open_modal: (e) => this.openModal(e) }, ...this.config.clientTools };
+    return {
+      ...{ open_modal: (e) => this.openModal(e) },
+      ...this.config.clientTools,
+    };
   }
   setupClientTools() {
-      if ("undefined" == typeof document) return;
-      document.addEventListener("elevenlabs-convai:call", (e) => {
-          this.log("elevenlabs-convai:call event triggered, registering client tools"),
-              this.log("Event detail:", e.detail),
-              e.detail && e.detail.config
-                  ? ((e.detail.config.clientTools = this.getClientTools()), this.log("Client tools registered successfully:", Object.keys(this.getClientTools())), this.log("Full config after registration:", e.detail.config))
-                  : this.log("Event detail or config is missing:", e.detail);
-      });
-      const e = () => {
-          const e = document.querySelector("elevenlabs-convai");
-          return !!e && ((e.clientTools = this.getClientTools()), this.log("Backup: Client tools set directly on widget"), !0);
-      };
-      setTimeout(() => {
-          if (!e()) {
-              const t = setInterval(() => {
-                  e() && clearInterval(t);
-              }, 100);
-              setTimeout(() => clearInterval(t), 5e3);
-          }
-      }, 100);
+    if ("undefined" == typeof document) return;
+    document.addEventListener("elevenlabs-convai:call", (e) => {
+      (this.log(
+        "elevenlabs-convai:call event triggered, registering client tools",
+      ),
+        this.log("Event detail:", e.detail),
+        e.detail && e.detail.config
+          ? ((e.detail.config.clientTools = this.getClientTools()),
+            this.log(
+              "Client tools registered successfully:",
+              Object.keys(this.getClientTools()),
+            ),
+            this.log("Full config after registration:", e.detail.config))
+          : this.log("Event detail or config is missing:", e.detail));
+    });
+    const e = () => {
+      const e = document.querySelector("elevenlabs-convai");
+      return (
+        !!e &&
+        ((e.clientTools = this.getClientTools()),
+        this.log("Backup: Client tools set directly on widget"),
+        !0)
+      );
+    };
+    setTimeout(() => {
+      if (!e()) {
+        const t = setInterval(() => {
+          e() && clearInterval(t);
+        }, 100);
+        setTimeout(() => clearInterval(t), 5e3);
+      }
+    }, 100);
   }
   updateConfig(e) {
-      (this.config = { ...this.config, ...e }), this.log("Configuration updated:", e), e.clientTools && this.setupClientTools();
+    ((this.config = { ...this.config, ...e }),
+      this.log("Configuration updated:", e),
+      e.clientTools && this.setupClientTools());
   }
   setClientTools(e) {
-      (this.config.clientTools = e), this.setupClientTools(), this.log("Client tools updated:", Object.keys(e));
+    ((this.config.clientTools = e),
+      this.setupClientTools(),
+      this.log("Client tools updated:", Object.keys(e)));
   }
   log(...e) {
-      this.config.debug && console.log("[Upriser Widget]", ...e);
+    this.config.debug && console.log("[Upriser Widget]", ...e);
   }
 }
-"undefined" != typeof module && module.exports && (module.exports = UpriserWidget),
+("undefined" != typeof module &&
+  module.exports &&
+  (module.exports = UpriserWidget),
   (function () {
-      "use strict";
-      function e() {
-          try {
-              if (window.upriserWidgetInstance && window.upriserWidgetInstance.isInitialized) return console.log("[Upriser Widget] Already initialized"), window.upriserWidgetInstance;
-              const e = new UpriserWidget(window.UPRISER_WIDGET_CONFIG);
-              return (
-                  e.init().catch(function (e) {
-                      console.error("[Upriser Widget] Initialization failed:", e);
-                  }),
-                  (window.upriserWidgetInstance = e),
-                  e
-              );
-          } catch (e) {
-              return console.error("[Upriser Widget] Failed to create widget:", e), null;
-          }
+    "use strict";
+    function e() {
+      try {
+        if (
+          window.upriserWidgetInstance &&
+          window.upriserWidgetInstance.isInitialized
+        )
+          return (
+            console.log("[Upriser Widget] Already initialized"),
+            window.upriserWidgetInstance
+          );
+        const e = new UpriserWidget(window.UPRISER_WIDGET_CONFIG);
+        return (
+          e.init().catch(function (e) {
+            console.error("[Upriser Widget] Initialization failed:", e);
+          }),
+          (window.upriserWidgetInstance = e),
+          e
+        );
+      } catch (e) {
+        return (
+          console.error("[Upriser Widget] Failed to create widget:", e),
+          null
+        );
       }
-      "undefined" != typeof window &&
-          "undefined" != typeof document &&
-          ((window.UpriserWidget = UpriserWidget),
-          window.UPRISER_WIDGET_CONFIG || (window.UPRISER_WIDGET_CONFIG = { agentId: "agent_8401k5nnvgqpezf9fd17t3tb7t69", debug: !1 }),
-          window.UPRISER_DISABLE_AUTO_INIT ||
-              ("complete" !== document.readyState && "interactive" !== document.readyState
-                  ? ("loading" === document.readyState && document.addEventListener("DOMContentLoaded", e),
-                    window.addEventListener("load", function () {
-                        (window.upriserWidgetInstance && window.upriserWidgetInstance.isInitialized) || e();
-                    }),
-                    "undefined" != typeof jQuery &&
-                        jQuery(document).ready(function () {
-                            (window.upriserWidgetInstance && window.upriserWidgetInstance.isInitialized) || e();
-                        }))
-                  : e()),
-          (window.initUpriserWidget = e));
-  })();
+    }
+    "undefined" != typeof window &&
+      "undefined" != typeof document &&
+      ((window.UpriserWidget = UpriserWidget),
+      window.UPRISER_WIDGET_CONFIG ||
+        (window.UPRISER_WIDGET_CONFIG = {
+          agentId: "agent_8401k5nnvgqpezf9fd17t3tb7t69",
+          debug: !1,
+        }),
+      window.UPRISER_DISABLE_AUTO_INIT ||
+        ("complete" !== document.readyState &&
+        "interactive" !== document.readyState
+          ? ("loading" === document.readyState &&
+              document.addEventListener("DOMContentLoaded", e),
+            window.addEventListener("load", function () {
+              (window.upriserWidgetInstance &&
+                window.upriserWidgetInstance.isInitialized) ||
+                e();
+            }),
+            "undefined" != typeof jQuery &&
+              jQuery(document).ready(function () {
+                (window.upriserWidgetInstance &&
+                  window.upriserWidgetInstance.isInitialized) ||
+                  e();
+              }))
+          : e()),
+      (window.initUpriserWidget = e));
+  })());
