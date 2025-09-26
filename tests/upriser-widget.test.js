@@ -64,6 +64,8 @@ describe('UpriserWidget', () => {
       expect(widget.intervals).toBeInstanceOf(Map);
       expect(widget.mutationObserver).toBeNull();
       expect(widget.isRelabelingComplete).toBe(false);
+      expect(widget.currentModal).toBeNull();
+      expect(widget.modalCounter).toBe(0);
     });
   });
 
@@ -242,6 +244,231 @@ describe('UpriserWidget', () => {
       }).not.toThrow();
       
       global.customElements = originalCustomElements;
+    });
+  });
+
+  describe('Modal Functionality', () => {
+    test('should create modal with URL', () => {
+      const modal = widget.createModal({
+        url: 'https://example.com',
+        title: 'Test Modal'
+      });
+      
+      expect(modal).toBeTruthy();
+      expect(modal.id).toMatch(/^upriser-modal-\d+$/);
+      expect(widget.currentModal).toBeTruthy();
+      expect(widget.modalCounter).toBe(1);
+      
+      // Check DOM
+      const modalElement = document.getElementById(modal.id);
+      expect(modalElement).toBeTruthy();
+      expect(modalElement.getAttribute('role')).toBe('dialog');
+      expect(modalElement.getAttribute('aria-modal')).toBe('true');
+      
+      // Check iframe
+      const iframe = modalElement.querySelector('iframe');
+      expect(iframe).toBeTruthy();
+      expect(iframe.src).toBe('https://example.com/');
+      expect(iframe.title).toBe('Test Modal');
+    });
+
+    test('should create modal with custom dimensions', () => {
+      const modal = widget.createModal({
+        url: 'https://example.com',
+        width: '80vw',
+        height: '70vh',
+        maxWidth: '800px'
+      });
+      
+      const modalElement = document.getElementById(modal.id);
+      const contentDiv = modalElement.querySelector('div > div');
+      
+      expect(contentDiv.style.width).toBe('80vw');
+      expect(contentDiv.style.height).toBe('70vh');
+      expect(contentDiv.style.maxWidth).toBe('800px');
+    });
+
+    test('should close modal', () => {
+      const modal = widget.createModal({
+        url: 'https://example.com'
+      });
+      
+      const modalId = modal.id;
+      expect(document.getElementById(modalId)).toBeTruthy();
+      
+      const closed = widget.closeModal();
+      
+      expect(closed).toBe(true);
+      expect(widget.currentModal).toBeNull();
+      expect(document.getElementById(modalId)).toBeNull();
+      expect(document.body.style.overflow).toBe('unset');
+    });
+
+    test('should close modal with onClose callback', () => {
+      const onCloseMock = jest.fn();
+      const modal = widget.createModal({
+        url: 'https://example.com',
+        onClose: onCloseMock
+      });
+      
+      // Simulate clicking the close button
+      const closeButton = modal.element.querySelector('button[aria-label="Close modal"]');
+      closeButton.click();
+      
+      expect(onCloseMock).toHaveBeenCalled();
+      expect(widget.currentModal).toBeNull();
+    });
+
+    test('should close modal on backdrop click', () => {
+      const onCloseMock = jest.fn();
+      const modal = widget.createModal({
+        url: 'https://example.com',
+        onClose: onCloseMock
+      });
+      
+      // Simulate clicking the backdrop
+      const backdrop = modal.element;
+      backdrop.click();
+      
+      expect(onCloseMock).toHaveBeenCalled();
+      expect(widget.currentModal).toBeNull();
+    });
+
+    test('should close modal on Escape key', () => {
+      const onCloseMock = jest.fn();
+      const modal = widget.createModal({
+        url: 'https://example.com',
+        onClose: onCloseMock
+      });
+      
+      // Simulate Escape key press
+      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+      document.dispatchEvent(escapeEvent);
+      
+      expect(onCloseMock).toHaveBeenCalled();
+      expect(widget.currentModal).toBeNull();
+    });
+
+    test('should not create multiple modals', () => {
+      const modal1 = widget.createModal({
+        url: 'https://example1.com'
+      });
+      
+      const modal2 = widget.createModal({
+        url: 'https://example2.com'
+      });
+      
+      expect(modal1).toBeTruthy();
+      expect(modal2).toBeNull();
+      expect(widget.modalCounter).toBe(1);
+    });
+
+    test('should return false when closing non-existent modal', () => {
+      const closed = widget.closeModal();
+      expect(closed).toBe(false);
+    });
+
+    test('should show vehicle page with valid URL', () => {
+      const result = widget.showVehiclePage({
+        url: 'https://example.com/vehicle/123',
+        title: 'Vehicle Details'
+      });
+      
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Vehicle modal opened successfully');
+      expect(widget.currentModal).toBeTruthy();
+      
+      // Check iframe content
+      const iframe = widget.currentModal.element.querySelector('iframe');
+      expect(iframe.src).toBe('https://example.com/vehicle/123');
+      expect(iframe.title).toBe('Vehicle Details');
+    });
+
+    test('should show vehicle page with default title', () => {
+      const result = widget.showVehiclePage({
+        url: 'https://example.com/vehicle/456'
+      });
+      
+      expect(result.success).toBe(true);
+      
+      const iframe = widget.currentModal.element.querySelector('iframe');
+      expect(iframe.title).toBe('Vehicle Details');
+    });
+
+    test('should fail to show vehicle page without URL', () => {
+      const result = widget.showVehiclePage({});
+      
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Missing or invalid URL parameter');
+      expect(widget.currentModal).toBeNull();
+    });
+
+    test('should fail to show vehicle page with invalid URL', () => {
+      const result = widget.showVehiclePage({
+        url: 123 // Invalid type
+      });
+      
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Missing or invalid URL parameter');
+      expect(widget.currentModal).toBeNull();
+    });
+
+    test('should provide client tools', () => {
+      const clientTools = widget.getClientTools();
+      
+      expect(clientTools).toHaveProperty('show_vehicle_page');
+      expect(typeof clientTools.show_vehicle_page).toBe('function');
+    });
+
+    test('should execute client tool show_vehicle_page', () => {
+      const clientTools = widget.getClientTools();
+      const result = clientTools.show_vehicle_page({
+        url: 'https://example.com/vehicle/789',
+        title: 'Test Vehicle'
+      });
+      
+      expect(result.success).toBe(true);
+      expect(widget.currentModal).toBeTruthy();
+    });
+
+    test('should clean up modal on widget destroy', () => {
+      const modal = widget.createModal({
+        url: 'https://example.com'
+      });
+      
+      const modalId = modal.id;
+      expect(document.getElementById(modalId)).toBeTruthy();
+      
+      widget.destroy();
+      
+      expect(widget.currentModal).toBeNull();
+      expect(document.getElementById(modalId)).toBeNull();
+    });
+
+    test('should set body overflow hidden when modal opens', () => {
+      widget.createModal({
+        url: 'https://example.com'
+      });
+      
+      expect(document.body.style.overflow).toBe('hidden');
+    });
+
+    test('should handle modal creation errors gracefully', () => {
+      // Mock document.createElement to throw an error
+      const originalCreateElement = document.createElement;
+      document.createElement = jest.fn().mockImplementation(() => {
+        throw new Error('Mock error');
+      });
+      
+      const modal = widget.createModal({
+        url: 'https://example.com'
+      });
+      
+      expect(modal).toBeNull();
+      expect(widget.currentModal).toBeNull();
+      
+      // Restore original function
+      document.createElement = originalCreateElement;
     });
   });
 
