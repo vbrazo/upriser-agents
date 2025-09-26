@@ -31,9 +31,9 @@ import UpriserWidget from "@upriser.ai/widget/dist/upriser-widget.js";
 
 // Create and initialize the widget
 const widget = new UpriserWidget({
-  agentId: 'your-agent-id-here', // Optional: defaults to Upriser's agent
-  fontColor: '#ffffff', // Optional: customize text color (NEW!)
-  linkColor: '#007bff' // Optional: customize link color (NEW!)
+  agentId: 'your-agent-id-here',
+  fontColor: '#ffffff',
+  linkColor: '#007bff'
 });
 
 // Initialize the widget
@@ -203,14 +203,12 @@ Upriser Widget supports complete whitelabeling with custom branding and colors!
 ### Custom HTML Element
 
 ```html
-<!-- NEW: Whitelabel custom element -->
 <upriser-convai 
     agent-id="agent_8401k5nnvgqpezf9fd17t3tb7t69"
     font-color="#ffffff"
     link-color="#007bff">
 </upriser-convai>
 
-<!-- Load the script -->
 <script src="https://unpkg.com/@upriser.ai/widget"></script>
 ```
 
@@ -233,8 +231,6 @@ const widget = document.querySelector('upriser-convai');
 // Change colors
 widget.setAttribute('font-color', '#ff6b6b');
 widget.setAttribute('link-color', '#4ecdc4');
-
-// Colors will be applied automatically
 ```
 
 ### JavaScript Class with Colors
@@ -326,7 +322,8 @@ const result = widget.openModal({
   title: 'Schedule a Demo',
   onClose: () => console.log('Modal closed')
 });
-console.log(result); // { success: true, message: "Modal opened successfully" }
+console.log(result);
+// { success: true, message: "Modal opened successfully" }
 ```
 
 ### `widget.setClientTools(clientTools)`
@@ -420,7 +417,6 @@ window.UPRISER_CLIENT_TOOLS = {
         onClose: () => {
           console.log('Demo modal closed');
           // Track analytics
-          gtag('event', 'demo_modal_closed');
         }
       });
     }
@@ -459,8 +455,6 @@ window.UPRISER_CLIENT_TOOLS = {
         title,
         onClose: () => {
           console.log('Vehicle modal closed');
-          // Track analytics
-          gtag('event', 'vehicle_modal_closed', { url, title });
         }
       });
     }
@@ -586,21 +580,17 @@ window.addEventListener('upriser:modal-opened', (event) => {
   
   // Track analytics based on modal type
   if (event.detail.type === 'demo') {
-    gtag('event', 'demo_modal_opened', { url: event.detail.url });
+    // ...
   } else if (event.detail.type === 'vehicle') {
-    gtag('event', 'vehicle_modal_opened', { 
-      url: event.detail.url, 
-      title: event.detail.title 
-    });
+    // ...
   }
 });
 
 // Listen for modal closed events  
 window.addEventListener('upriser:modal-closed', (event) => {
   console.log('Modal closed:', event.detail);
-  
-  // Track analytics
-  gtag('event', 'modal_closed', { type: event.detail.type });
+
+  // you could track analytics here
 });
 ```
 
