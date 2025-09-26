@@ -8,6 +8,12 @@ export interface UpriserWidgetConfig {
   widgetContainer?: HTMLElement | null;
   /** Enable debug logging */
   debug?: boolean;
+  /** Primary text colour applied within the widget */
+  fontColor?: string;
+  /** Link colour applied within the widget */
+  linkColor?: string;
+  /** Client tool functions exposed to the ElevenLabs widget */
+  clientTools?: Record<string, (parameters: any) => any>;
   /** Additional configuration options */
   [key: string]: any;
 }
@@ -69,6 +75,30 @@ export declare class UpriserWidget {
    * Create the Upriser ConvAI element in the DOM
    */
   createConvAIElement(): void;
+
+  /**
+   * Create and display a generic iframe modal
+   * @param options Modal configuration
+   */
+  openModal(options: { url: string; title?: string; onClose?: () => void }): {
+    success: boolean;
+    message: string;
+  };
+
+  /**
+   * Combine default tools with configured client tools
+   */
+  getClientTools(): Record<string, (parameters: any) => any>;
+
+  /**
+   * Wire client tools into the embedded ElevenLabs element
+   */
+  setupClientTools(): void;
+
+  /**
+   * Replace current client tools and re-wire
+   */
+  setClientTools(clientTools: Record<string, (parameters: any) => any>): void;
 
   /**
    * Relabel and rewrite widget elements to use Upriser branding
@@ -201,6 +231,10 @@ declare global {
     UPRISER_DISABLE_AUTO_INIT?: boolean;
     /** Global widget instance */
     upriserWidget?: UpriserWidget;
+    /** Alternate global widget instance name used by some apps */
+    upriserWidgetInstance?: UpriserWidget;
+    /** Backup global map of client tool functions */
+    UPRISER_CLIENT_TOOLS?: Record<string, (parameters: any) => any>;
     /** Manual initialization function */
     initUpriserWidget: typeof initUpriserWidget;
     /** Internal script loading promise */
