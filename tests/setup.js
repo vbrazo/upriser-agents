@@ -16,7 +16,7 @@ global.console = {
   ...console,
   log: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn(),
+  error: jest.fn()
 };
 
 // Setup document body
@@ -26,5 +26,5 @@ document.body.innerHTML = "";
 global.customElements = {
   define: jest.fn(),
   get: jest.fn(),
-  whenDefined: jest.fn(() => Promise.resolve()),
+  whenDefined: jest.fn(() => Promise.resolve())
 };

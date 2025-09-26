@@ -4,7 +4,7 @@ const path = require("path");
 // Load the widget code
 const widgetCode = fs.readFileSync(
   path.join(__dirname, "../src/upriser-widget.js"),
-  "utf8",
+  "utf8"
 );
 
 // Execute the widget code in the test environment
@@ -23,7 +23,7 @@ describe("UpriserWidget", () => {
     // Create a new widget instance
     widget = new UpriserWidget({
       debug: true,
-      agentId: "test-agent-id",
+      agentId: "test-agent-id"
     });
   });
 
@@ -38,7 +38,7 @@ describe("UpriserWidget", () => {
       const defaultWidget = new UpriserWidget();
 
       expect(defaultWidget.config.agentId).toBe(
-        "agent_8401k5nnvgqpezf9fd17t3tb7t69",
+        "agent_8401k5nnvgqpezf9fd17t3tb7t69"
       );
       expect(defaultWidget.config.debug).toBe(false);
       expect(defaultWidget.config.fontColor).toBe("#ffffff");
@@ -55,13 +55,13 @@ describe("UpriserWidget", () => {
     test("should create widget with custom colors", () => {
       const colorWidget = new UpriserWidget({
         fontColor: "#ff6b6b",
-        linkColor: "#4ecdc4",
+        linkColor: "#4ecdc4"
       });
 
       expect(colorWidget.config.fontColor).toBe("#ff6b6b");
       expect(colorWidget.config.linkColor).toBe("#4ecdc4");
       expect(colorWidget.config.agentId).toBe(
-        "agent_8401k5nnvgqpezf9fd17t3tb7t69",
+        "agent_8401k5nnvgqpezf9fd17t3tb7t69"
       ); // Default
     });
 
@@ -80,7 +80,7 @@ describe("UpriserWidget", () => {
     test("should update config", () => {
       widget.updateConfig({
         debug: false,
-        newProperty: "test",
+        newProperty: "test"
       });
 
       expect(widget.config.debug).toBe(false);
@@ -96,7 +96,7 @@ describe("UpriserWidget", () => {
       expect(console.log).toHaveBeenCalledWith(
         "[Upriser Widget]",
         "test message",
-        "additional info",
+        "additional info"
       );
     });
 
@@ -174,11 +174,11 @@ describe("UpriserWidget", () => {
       // Add some timeouts and intervals
       widget.timeouts.set(
         "test",
-        setTimeout(() => {}, 1000),
+        setTimeout(() => {}, 1000)
       );
       widget.intervals.set(
         "test",
-        setInterval(() => {}, 1000),
+        setInterval(() => {}, 1000)
       );
 
       // Create ConvAI element
@@ -197,11 +197,11 @@ describe("UpriserWidget", () => {
       // Add some timeouts and intervals
       widget.timeouts.set(
         "test",
-        setTimeout(() => {}, 1000),
+        setTimeout(() => {}, 1000)
       );
       widget.intervals.set(
         "test",
-        setInterval(() => {}, 1000),
+        setInterval(() => {}, 1000)
       );
 
       // Create Upriser ConvAI element
@@ -241,14 +241,14 @@ describe("UpriserWidget", () => {
 
       expect(global.customElements.define).toHaveBeenCalledWith(
         "upriser-convai",
-        expect.any(Function),
+        expect.any(Function)
       );
     });
 
     test("should not define custom element when already defined", () => {
       // Mock customElements API
       global.customElements.define = jest.fn();
-      global.customElements.get = jest.fn().mockReturnValue(function () {}); // Already defined
+      global.customElements.get = jest.fn().mockReturnValue(function() {}); // Already defined
 
       widget.defineUpriserConvAIElement();
 
@@ -271,7 +271,7 @@ describe("UpriserWidget", () => {
     test("should create modal with URL", () => {
       const modal = widget.createModal({
         url: "https://example.com",
-        title: "Test Modal",
+        title: "Test Modal"
       });
 
       expect(modal).toBeTruthy();
@@ -297,7 +297,7 @@ describe("UpriserWidget", () => {
         url: "https://example.com",
         width: "80vw",
         height: "70vh",
-        maxWidth: "800px",
+        maxWidth: "800px"
       });
 
       const modalElement = document.getElementById(modal.id);
@@ -310,7 +310,7 @@ describe("UpriserWidget", () => {
 
     test("should close modal", () => {
       const modal = widget.createModal({
-        url: "https://example.com",
+        url: "https://example.com"
       });
 
       const modalId = modal.id;
@@ -328,12 +328,12 @@ describe("UpriserWidget", () => {
       const onCloseMock = jest.fn();
       const modal = widget.createModal({
         url: "https://example.com",
-        onClose: onCloseMock,
+        onClose: onCloseMock
       });
 
       // Simulate clicking the close button
       const closeButton = modal.element.querySelector(
-        'button[aria-label="Close modal"]',
+        "button[aria-label=\"Close modal\"]"
       );
       closeButton.click();
 
@@ -345,7 +345,7 @@ describe("UpriserWidget", () => {
       const onCloseMock = jest.fn();
       const modal = widget.createModal({
         url: "https://example.com",
-        onClose: onCloseMock,
+        onClose: onCloseMock
       });
 
       // Simulate clicking the backdrop
@@ -358,9 +358,9 @@ describe("UpriserWidget", () => {
 
     test("should close modal on Escape key", () => {
       const onCloseMock = jest.fn();
-      const modal = widget.createModal({
+      widget.createModal({
         url: "https://example.com",
-        onClose: onCloseMock,
+        onClose: onCloseMock
       });
 
       // Simulate Escape key press
@@ -373,11 +373,11 @@ describe("UpriserWidget", () => {
 
     test("should not create multiple modals", () => {
       const modal1 = widget.createModal({
-        url: "https://example1.com",
+        url: "https://example1.com"
       });
 
       const modal2 = widget.createModal({
-        url: "https://example2.com",
+        url: "https://example2.com"
       });
 
       expect(modal1).toBeTruthy();
@@ -390,14 +390,14 @@ describe("UpriserWidget", () => {
       expect(closed).toBe(false);
     });
 
-    test("should show vehicle page with valid URL", () => {
-      const result = widget.showVehiclePage({
+    test("should open modal with valid URL", () => {
+      const result = widget.openModal({
         url: "https://example.com/vehicle/123",
-        title: "Vehicle Details",
+        title: "Vehicle Details"
       });
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe("Vehicle modal opened successfully");
+      expect(result.message).toBe("Modal opened successfully");
       expect(widget.currentModal).toBeTruthy();
 
       // Check iframe content
@@ -406,47 +406,29 @@ describe("UpriserWidget", () => {
       expect(iframe.title).toBe("Vehicle Details");
     });
 
-    test("should show vehicle page with default title", () => {
-      const result = widget.showVehiclePage({
-        url: "https://example.com/vehicle/456",
+    test("should open modal with default title", () => {
+      const result = widget.openModal({
+        url: "https://example.com/vehicle/456"
       });
 
       expect(result.success).toBe(true);
 
       const iframe = widget.currentModal.element.querySelector("iframe");
-      expect(iframe.title).toBe("Vehicle Details");
-    });
-
-    test("should fail to show vehicle page without URL", () => {
-      const result = widget.showVehiclePage({});
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Missing or invalid URL parameter");
-      expect(widget.currentModal).toBeNull();
-    });
-
-    test("should fail to show vehicle page with invalid URL", () => {
-      const result = widget.showVehiclePage({
-        url: 123, // Invalid type
-      });
-
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Missing or invalid URL parameter");
-      expect(widget.currentModal).toBeNull();
+      expect(iframe.title).toBe("Modal");
     });
 
     test("should provide client tools", () => {
       const clientTools = widget.getClientTools();
 
-      expect(clientTools).toHaveProperty("show_vehicle_page");
-      expect(typeof clientTools.show_vehicle_page).toBe("function");
+      expect(clientTools).toHaveProperty("open_modal");
+      expect(typeof clientTools.open_modal).toBe("function");
     });
 
-    test("should execute client tool show_vehicle_page", () => {
+    test("should execute client tool open_modal", () => {
       const clientTools = widget.getClientTools();
-      const result = clientTools.show_vehicle_page({
+      const result = clientTools.open_modal({
         url: "https://example.com/vehicle/789",
-        title: "Test Vehicle",
+        title: "Test Vehicle"
       });
 
       expect(result.success).toBe(true);
@@ -455,7 +437,7 @@ describe("UpriserWidget", () => {
 
     test("should clean up modal on widget destroy", () => {
       const modal = widget.createModal({
-        url: "https://example.com",
+        url: "https://example.com"
       });
 
       const modalId = modal.id;
@@ -469,7 +451,7 @@ describe("UpriserWidget", () => {
 
     test("should set body overflow hidden when modal opens", () => {
       widget.createModal({
-        url: "https://example.com",
+        url: "https://example.com"
       });
 
       expect(document.body.style.overflow).toBe("hidden");
@@ -483,7 +465,7 @@ describe("UpriserWidget", () => {
       });
 
       const modal = widget.createModal({
-        url: "https://example.com",
+        url: "https://example.com"
       });
 
       expect(modal).toBeNull();
@@ -498,7 +480,7 @@ describe("UpriserWidget", () => {
     test("should use custom colors in relabeling", () => {
       const colorWidget = new UpriserWidget({
         fontColor: "#ff6b6b",
-        linkColor: "#4ecdc4",
+        linkColor: "#4ecdc4"
       });
 
       // Create a mock span element with "Powered by ElevenLabs" text
@@ -517,7 +499,7 @@ describe("UpriserWidget", () => {
     test("should use custom link colors", () => {
       const colorWidget = new UpriserWidget({
         fontColor: "#ffffff",
-        linkColor: "#007bff",
+        linkColor: "#007bff"
       });
 
       // Create a mock link element

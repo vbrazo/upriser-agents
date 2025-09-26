@@ -2,6 +2,28 @@
 
 A standalone JavaScript widget for integrating Upriser ConvAI into any website. This package provides both npm module support and raw JavaScript files for maximum flexibility.
 
+## 📚 Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [NPM Module Usage](#npm-module-usage)
+  - [Raw JavaScript Usage](#raw-javascript-usage)
+- [🚀 Modal & Client Tools (NEW!)](#-modal--client-tools-new)
+- [🎨 Whitelabel Features](#-whitelabel-features)
+- [Configuration Options](#configuration-options)
+- [API Methods](#api-methods)
+- [React Integration Example](#react-integration-example)
+- [🎯 Client Tools Use Cases](#-client-tools-use-cases)
+- [Vue Integration Example](#vue-integration-example)
+- [📡 Event Handling](#-event-handling)
+- [Browser Support](#browser-support)
+- [Features](#features)
+- [Development](#development)
+- [🔄 Continuous Integration (CI)](#-continuous-integration-ci)
+- [File Structure](#file-structure)
+- [License](#license)
+- [Support](#support)
+
 ## Installation
 
 ### Option 1: NPM Package (Recommended for React, Vue, Angular, etc.)
@@ -715,6 +737,91 @@ npm test
 # Watch tests
 npm test:watch
 ```
+
+## 🔄 Continuous Integration (CI)
+
+This project uses GitHub Actions for continuous integration to ensure code quality and reliability across multiple Node.js versions.
+
+### CI Pipeline Overview
+
+The CI pipeline runs on every push and pull request to `main`, `master`, and `develop` branches, performing the following checks:
+
+#### Test Job
+- **Node.js Matrix Testing**: Tests against Node.js versions 16.x, 18.x, and 20.x
+- **Dependency Installation**: Uses `npm ci` for clean, reproducible builds
+- **Code Linting**: Runs ESLint to ensure code quality
+- **Test Execution**: Runs the complete test suite
+- **Build Verification**: Ensures all build formats compile successfully
+- **Coverage Reports**: Uploads test coverage to Codecov (Node.js 18.x only)
+
+#### Lint Job
+- **Dedicated Linting**: Separate job for thorough ESLint checks
+- **Node.js 18.x**: Uses stable Node.js version for consistent linting
+
+### Available Scripts for CI
+
+```bash
+# Core CI commands
+npm ci                 # Clean install (used in CI)
+npm run lint          # Run ESLint
+npm run lint:check    # Check linting without fixing
+npm run lint:fix      # Fix linting issues automatically
+npm test              # Run test suite
+npm test:coverage     # Run tests with coverage report
+npm run build         # Build all formats (UMD, ESM, Types, Raw)
+
+# Individual build commands
+npm run build:raw     # Build raw JavaScript file
+npm run build:umd     # Build UMD format
+npm run build:esm     # Build ES module format
+npm run build:types   # Generate TypeScript definitions
+```
+
+### Local Development Workflow
+
+To match the CI environment locally:
+
+```bash
+# 1. Clean install dependencies (like CI)
+npm ci
+
+# 2. Run linting checks
+npm run lint:check
+
+# 3. Run tests with coverage
+npm test:coverage
+
+# 4. Verify build works
+npm run build
+
+# 5. Fix any linting issues
+npm run lint:fix
+```
+
+### CI Configuration Details
+
+The CI configuration includes:
+
+- **Automated Testing**: Ensures all tests pass before merging
+- **Multi-Node Support**: Validates compatibility across Node.js LTS versions
+- **Code Quality**: ESLint enforcement for consistent code style
+- **Build Verification**: Confirms all distribution formats build successfully
+- **Coverage Tracking**: Monitors test coverage trends via Codecov
+- **Fail-Fast**: Stops on first failure to provide quick feedback
+
+### Contributing Guidelines
+
+When contributing to this project:
+
+1. **Write Tests**: All new features must include comprehensive tests [[memory:9100424]]
+2. **Follow Linting**: Ensure `npm run lint:check` passes
+3. **Test Locally**: Run `npm test` before submitting PRs
+4. **Build Verification**: Confirm `npm run build` succeeds
+5. **Coverage**: Maintain or improve test coverage
+
+### CI Status
+
+The CI pipeline must pass for all pull requests. Check the GitHub Actions tab for detailed build logs and status updates.
 
 ## File Structure
 

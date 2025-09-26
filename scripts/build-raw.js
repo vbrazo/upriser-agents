@@ -9,5 +9,5 @@ const rawPath = path.join(__dirname, "../upriser-widget.js");
 fs.copyFileSync(srcPath, rawPath);
 
 console.log(
-  "✅ Raw JavaScript build completed: upriser-widget.js (for CDN/direct usage)",
+  "✅ Raw JavaScript build completed: upriser-widget.js (for CDN/direct usage)"
 );
